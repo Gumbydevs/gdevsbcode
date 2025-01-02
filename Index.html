@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode to Monster Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        #scanner-container {
+            display: none;
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        #scanner {
+            width: 100%;
+            height: auto;
+        }
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px dashed #00FF00;
+            box-sizing: border-box;
+            pointer-events: none;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        #monster-image {
+            margin-top: 20px;
+            max-width: 100%;
+            height: auto;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+</head>
+<body>
+    <h1>Barcode to Monster Generator</h1>
+    <p>Click the button below to start scanning a barcode and generate your unique monster.</p>
+    <button id="start-button">Start Scanning</button>
+    <div id="scanner-container">
+        <video id="scanner"></video>
+        <div id="overlay"></div>
+    </div>
+    <div id="result"></div>
+    <img id="monster-image" alt="Your Generated Monster" style="display:none;"/>
+    
+    <script>
+        const startButton = document.getElementById('start-button');
+        const scannerContainer = document.getElementById('scanner-container');
+        const scanner = document.getElementById('scanner');
+        const resultDiv = document.getElementById('result');
+        const monsterImage = document.getElementById('monster-image');
+
+        startButton.addEventListener('click', () => {
+            startButton.style.display = 'none';
+            scannerContainer.style.display = 'block';
+            startScanning();
+        });
+
+        function startScanning() {
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: scanner,
+                    constraints: {
+                        facingMode: "environment"
+                    }
+                },
+                decoder: {
+                    readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader"]
+                },
+                locate: true
+            }, function(err) {
+                if (err) {
+                    console.error(err);
+                    alert('Error initializing barcode scanner.');
+                    return;
+                }
+                Quagga.start();
+            });
+
+            Quagga.onDetected(onBarcodeDetected);
+        }
+
+        function onBarcodeDetected(result) {
+            const barcode = result.codeResult.code;
+            Quagga.offDetected(onBarcodeDetected);
+            Quagga.stop();
+            scannerContainer.style.display = 'none';
+            resultDiv.innerHTML = `Scanned Barcode: ${barcode}`;
+            generateMonster(barcode);
+        }
+
+        function generateMonster(barcode) {
+            const monsterSeed = barcode;
+            const monsterImageUrl = `https://dummyimage.com/400x400/000/fff&text=Monster+Seed+${monsterSeed}`;
+            monsterImage.src = monsterImageUrl;
+            monsterImage.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
