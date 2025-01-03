@@ -131,8 +131,6 @@
   <div id="consoleOutput"></div>
   <div id="version">Version 0.031</div>
   <div style="font-size: 12px; color: gray; margin-top: 20px;">&copy; 2025 Barcode Masters. All rights reserved.</div>
- 
- 
 
   <script type="module">
     import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?v=1.018";
@@ -177,14 +175,14 @@
 
     function displayMonsterInfo(monster) {
       imagePlaceholder.style.visibility = "visible"; // Make placeholder visible after scan
-      monsterInfo.innerHTML = `
+      monsterInfo.innerHTML = ` 
         <div><span class="info-item">ID:</span> <span class="info-value">${monster.id}</span></div>
         <div><span class="info-item">Name:</span> <span class="info-value">${monster.name}</span></div>
         <div><span class="info-item">Level:</span> <span class="info-value">${monster.level}</span></div>
         <div><span class="info-item">HP:</span> <span class="info-value">${monster.hp}</span></div>
         <div><span class="info-item">AP:</span> <span class="info-value">${monster.ap}</span></div>
         <div><span class="info-item">Speed:</span> <span class="info-value">${monster.speed}</span></div>
-        <div><span class="info-item">Source Code:</span> <span class="info-value">${monster.barcode}</span></div>
+        <div><span class="info-item">DNA Source Code:</span> <span class="info-value">${monster.barcode}</span></div>
       `;
     }
 
@@ -198,14 +196,13 @@
           (result) => {
             if (!barcodeScanned) {
               barcodeScanned = true;
-              message.textContent = `Scan Successful: ${result.data}`;
+              const monster = generateMonster(result.data);
+              message.innerHTML = `<strong>${monster.name}</strong> - Scan Successful: ${result.data}`;
               qrScanner.stop();
               video.style.display = "none";
               scanButton.style.display = "block";
               forceScanButton.style.display = "none";
               logToConsole(`Scan Result: ${result.data}`);
-
-              const monster = generateMonster(result.data);
               displayMonsterInfo(monster);
             }
           },
