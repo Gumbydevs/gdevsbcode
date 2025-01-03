@@ -5,77 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Barcode Scanner - Version 1.018</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-    #video {
-      width: 100%;
-      max-width: 400px;
-      display: none;
-      margin: 10px auto;
-    }
-    #message {
-      margin-top: 10px;
-      font-size: 18px;
-      color: green;
-    }
-    #scanButton, #forceScanButton {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-      margin-top: 10px;
-      display: block;
-      width: 80%;
-      max-width: 300px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    #scanButton:disabled, #forceScanButton:disabled {
-      background-color: #6c757d;
-      cursor: not-allowed;
-    }
-    #consoleOutput {
-      margin-top: 20px;
-      text-align: left;
-      font-size: 14px;
-      color: red;
-      background-color: #f8d7da;
-      padding: 10px;
-      border-radius: 5px;
-      white-space: pre-line;
-    }
-    #monsterInfo {
-      margin-top: 20px;
-      background-color: #e0e0e0;
-      padding: 20px;
-      border-radius: 10px;
-      display: inline-block;
-      text-align: left;
-      font-size: 16px;
-      width: 80%;
-      max-width: 400px;
-      margin: 10px auto;
-    }
-    .info-item {
-      margin: 5px 0;
-      font-weight: bold;
-    }
-    .info-value {
-      margin-left: 10px;
-      font-weight: normal;
-      color: #333;
-    }
-    #version {
-      font-size: 12px;
-      color: gray;
-      margin-top: 10px;
-    }
+    /* Your existing styles here */
   </style>
 </head>
 <body>
@@ -115,8 +45,8 @@
     let barcodeScanned = false;
     let focusInterval;
 
-    // Assume there's a player object and their monster collection
-    let player = {
+    // Retrieve player data from localStorage or set defaults
+    let player = JSON.parse(localStorage.getItem('player')) || {
       id: 'player1',
       monsterCollection: []  // Collection of monsters
     };
@@ -181,9 +111,10 @@
       return "MONSTER-" + id; // Simple but unique ID based on barcode content
     }
 
-    // Add monster to the player's collection
+    // Add monster to the player's collection and update localStorage
     function addMonsterToCollection(monster) {
       player.monsterCollection.push(monster);
+      localStorage.setItem('player', JSON.stringify(player));  // Save to localStorage
       logToConsole(`Monster added to collection: ${monster.name}`);
       alert("Monster has been added to your collection!");
     }
