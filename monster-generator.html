@@ -5,19 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Barcode Scanner - Version 1.018</title>
   <style>
-    /* Your existing styles here */
+    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+    #video { width: 100%; max-width: 400px; display: none; margin-top: 10px; }
+    .buttons { margin-top: 20px; }
+    .button { margin: 5px; padding: 10px; font-size: 16px; cursor: pointer; }
+    #monsterInfo { margin-top: 20px; }
+    .popup { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; background: white; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+    .popup button { margin: 10px; padding: 10px; font-size: 14px; }
   </style>
 </head>
 <body>
   <h1>Barcode Scanner</h1>
   <button id="scanButton">Click to Scan Barcode</button>
-  <button id="forceScanButton">Force Scan</button>
+  <button id="forceScanButton" style="display: none;">Force Scan</button>
   <video id="video" autoplay></video>
   <div id="message"></div>
-  
+
   <!-- Monster Info section -->
   <div id="monsterInfo"></div>
-  
+
+  <!-- Popup for saving monster -->
+  <div id="savePopup" class="popup">
+    <p id="popupMessage"></p>
+    <button id="saveButton">Save to Collection</button>
+    <button id="cancelButton">Cancel</button>
+  </div>
+
   <!-- Buttons Section for other game areas -->
   <div class="buttons">
     <button class="button" onclick="window.location.href='monster-collection.html'">Fighter Collection</button>
@@ -40,18 +53,21 @@
     const message = document.getElementById("message");
     const consoleOutput = document.getElementById("consoleOutput");
     const monsterInfo = document.getElementById("monsterInfo");
+    const savePopup = document.getElementById("savePopup");
+    const popupMessage = document.getElementById("popupMessage");
+    const saveButton = document.getElementById("saveButton");
+    const cancelButton = document.getElementById("cancelButton");
 
     let qrScanner;
     let barcodeScanned = false;
-    let focusInterval;
 
     // Retrieve player data from localStorage or set defaults
     let player = JSON.parse(localStorage.getItem('player')) || {
       id: 'player1',
-      monsterCollection: []  // Collection of monsters
+      monsterCollection: []
     };
 
-    // Debug logging function to show messages on the webpage
+    // Debug logging function
     function logToConsole(msg) {
       const logMessage = document.createElement('div');
       logMessage.textContent = msg;
@@ -59,161 +75,83 @@
       console.log(msg);
     }
 
-    // Continuous autofocus adjustment
-    function startContinuousAutofocus() {
-      if (focusInterval) clearInterval(focusInterval);
-      focusInterval = setInterval(() => {
-        const track = video.srcObject?.getVideoTracks()[0];
-        if (track) {
-          track.applyConstraints({ advanced: [{ focusMode: "continuous" }] });
-        }
-      }, 2000);
-    }
-
-    function stopContinuousAutofocus() {
-      if (focusInterval) clearInterval(focusInterval);
-    }
-
-    // Generate a random monster name
-    function generateRandomName() {
+    // Generate random monster data
+    function generateMonsterData(barcodeData) {
       const names = ["Gorgoth", "Slithor", "Zarvok", "Magrath", "Korrak", "Zypheron"];
-      return names[Math.floor(Math.random() * names.length)];
-    }
-
-    // Generate random stats for the monster, with boosts for higher levels
-    function generateMonsterStats(level) {
-      let stats = {
-        HP: Math.floor(Math.random() * 100) + 50, // Random HP between 50 and 150
-        AP: Math.floor(Math.random() * 20) + 10,  // Random AP between 10 and 30
-        Speed: Math.floor(Math.random() * 10) + 5, // Random Speed between 5 and 15
+      const monsterId = "MONSTER-" + barcodeData.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      const name = names[Math.floor(Math.random() * names.length)];
+      const level = Math.random() < 0.1 ? Math.floor(Math.random() * 3) + 2 : 1;
+      const stats = {
+        HP: Math.floor(Math.random() * 100) + 50,
+        AP: Math.floor(Math.random() * 20) + 10,
+        Speed: Math.floor(Math.random() * 10) + 5
       };
-
-      // If level 2 or 3, boost stats
-      if (level === 2) {
-        stats.HP = Math.floor(stats.HP * 1.2); // 20% boost
-        stats.AP = Math.floor(stats.AP * 1.2); // 20% boost
-        stats.Speed = Math.floor(stats.Speed * 1.2); // 20% boost
-      } else if (level === 3) {
-        stats.HP = Math.floor(stats.HP * 1.5); // 50% boost
-        stats.AP = Math.floor(stats.AP * 1.5); // 50% boost
-        stats.Speed = Math.floor(stats.Speed * 1.5); // 50% boost
+      if (level > 1) {
+        stats.HP = Math.floor(stats.HP * (1 + 0.2 * level));
+        stats.AP = Math.floor(stats.AP * (1 + 0.2 * level));
+        stats.Speed = Math.floor(stats.Speed * (1 + 0.2 * level));
       }
 
-      return stats;
+      return { id: monsterId, name, level, stats };
     }
 
-    // Generate unique monster ID based on barcode data
-    function generateMonsterId(barcodeData) {
-      let id = 0;
-      for (let i = 0; i < barcodeData.length; i++) {
-        id += barcodeData.charCodeAt(i);
-      }
-      return "MONSTER-" + id; // Simple but unique ID based on barcode content
-    }
-
-    // Add monster to the player's collection and update localStorage
+    // Add monster to collection
     function addMonsterToCollection(monster) {
       player.monsterCollection.push(monster);
-      localStorage.setItem('player', JSON.stringify(player));  // Save to localStorage
-      logToConsole(`Monster added to collection: ${monster.name}`);
-      alert("Monster has been added to your collection!");
+      localStorage.setItem('player', JSON.stringify(player));
+      logToConsole(`Monster added: ${monster.name}`);
     }
 
-    // Prompt user to add monster to collection
-    function promptToAddMonster(monster) {
-      const confirmAdd = confirm(`Do you want to add ${monster.name} to your collection?`);
-      if (confirmAdd) {
+    // Display popup to save monster
+    function showSavePopup(monster) {
+      popupMessage.textContent = `Add ${monster.name} (Level ${monster.level}) to your collection?`;
+      savePopup.style.display = "block";
+
+      saveButton.onclick = () => {
         addMonsterToCollection(monster);
-      } else {
-        alert(`You chose not to add ${monster.name}.`);
-      }
+        savePopup.style.display = "none";
+        alert(`${monster.name} has been added to your collection!`);
+      };
+
+      cancelButton.onclick = () => {
+        savePopup.style.display = "none";
+      };
     }
 
-    // Start scanning QR code
+    // Start scanning
     scanButton.addEventListener("click", async () => {
-      logToConsole("Button clicked - starting scan...");
       barcodeScanned = false;
-      message.textContent = "";
-
       video.style.display = "block";
       scanButton.style.display = "none";
       forceScanButton.style.display = "inline-block";
 
-      try {
-        qrScanner = new QrScanner(
-          video,
-          (result) => {
-            if (!barcodeScanned) {
-              barcodeScanned = true;
-              const resultData = result?.data || "Unknown format";
-              const monsterId = generateMonsterId(resultData); // Unique ID based on barcode
-              const monsterName = generateRandomName();
-              
-              // Random level with 10% chance of level 2 or 3
-              const level = Math.random() < 0.1 ? Math.floor(Math.random() * 3) + 2 : 1;
+      qrScanner = new QrScanner(video, (result) => {
+        if (!barcodeScanned) {
+          barcodeScanned = true;
+          const monster = generateMonsterData(result.data);
+          monsterInfo.innerHTML = `
+            <div>Monster ID: ${monster.id}</div>
+            <div>Name: ${monster.name}</div>
+            <div>Level: ${monster.level}</div>
+            <div>HP: ${monster.stats.HP}</div>
+            <div>AP: ${monster.stats.AP}</div>
+            <div>Speed: ${monster.stats.Speed}</div>
+          `;
+          qrScanner.stop();
+          video.style.display = "none";
+          scanButton.style.display = "inline-block";
+          forceScanButton.style.display = "none";
+          showSavePopup(monster);
+        }
+      });
 
-              // Generate stats based on the level
-              const stats = generateMonsterStats(level);
-
-              // Create the monster object
-              const monster = {
-                id: monsterId,
-                name: monsterName,
-                level: level,
-                stats: stats
-              };
-
-              // Update the message with nicely formatted monster info
-              message.textContent = `Scan Successful: ${resultData}`;
-              monsterInfo.innerHTML = ` 
-                <div class="info-item">Monster ID:</div><div class="info-value">${monsterId}</div>
-                <div class="info-item">Name:</div><div class="info-value">${monsterName}</div>
-                <div class="info-item">HP:</div><div class="info-value">${stats.HP}</div>
-                <div class="info-item">AP:</div><div class="info-value">${stats.AP}</div>
-                <div class="info-item">Speed:</div><div class="info-value">${stats.Speed}</div>
-                <div class="info-item">Level:</div><div class="info-value">${level}</div>
-              `;
-
-              logToConsole(`Scan Successful: ${resultData}\nMonster ID: ${monsterId}\nName: ${monsterName}\nHP: ${stats.HP}\nAP: ${stats.AP}\nSpeed: ${stats.Speed}\nLevel: ${level}`);
-              qrScanner.stop();
-              stopContinuousAutofocus();
-              video.style.display = "none";
-              scanButton.style.display = "inline-block";
-              forceScanButton.style.display = "none";
-
-              // Prompt user to add the monster to collection
-              promptToAddMonster(monster);
-            }
-          },
-          {
-            highlightScanRegion: true,
-            preferredScanTypes: ["qr-code", "ean_13", "ean_8", "upc_a", "upc_e", "code_128"], // Added classic barcodes
-          }
-        );
-
-        await qrScanner.start();
-        startContinuousAutofocus();
-        logToConsole("QR Scanner started...");
-      } catch (error) {
-        logToConsole(`Error: ${error.message}`);
-      }
+      await qrScanner.start();
+      logToConsole("Scanner started...");
     });
 
-    // Force Scan Button click event
-    forceScanButton.addEventListener("click", async () => {
-      logToConsole("Force Scan button clicked...");
-      if (qrScanner) {
-        const result = await qrScanner.scanImage();
-        const resultData = result?.data || "No barcode detected";
-        message.textContent = `Force Scan Result: ${resultData}`;
-        logToConsole(`Force Scan Result: ${resultData}`);
-      }
-    });
-
-    // Cleanup when page is closed
+    // Cleanup on unload
     window.addEventListener("beforeunload", () => {
       if (qrScanner) qrScanner.destroy();
-      stopContinuousAutofocus();
     });
   </script>
 </body>
