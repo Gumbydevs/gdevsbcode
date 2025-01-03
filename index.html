@@ -75,9 +75,11 @@
       barcodeScanned = false;
       message.textContent = "";
 
+      // Hide the button while scanning
+      scanButton.style.display = "none";
+
       // Show video and start scanning
       video.style.display = "block";
-      scanButton.disabled = true;
 
       // Initialize QR Scanner
       qrScanner = new QrScanner(
@@ -87,12 +89,13 @@
             barcodeScanned = true; // Stop further scanning
             qrScanner.stop(); // Stop the scanner
             video.style.display = "none"; // Hide the video feed
-            scanButton.disabled = false; // Re-enable the button
+            scanButton.style.display = "inline-block"; // Show the button again
             message.textContent = `Barcode Scanned: ${result}`;
           }
         },
         {
           highlightScanRegion: true,
+          maxScansPerSecond: 1, // Adjust the rate of scanning (to prevent too many scans in a short time)
         }
       );
 
