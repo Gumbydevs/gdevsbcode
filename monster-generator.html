@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode DNA Extractor - Version 0.029</title>
+  <title>Barcode DNA Extractor - Version 0.031</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -85,12 +85,12 @@
       color: #666;
       margin-top: 20px;
     }
-    /* Updated styles for the adjusted placeholder size */
+    /* Updated styles for the larger placeholder */
     #imagePlaceholder {
-      visibility: hidden; /* Hidden by default, not taking space */
-      width: 50%; /* Slightly larger than before */
-      max-width: 160px; /* Limit the maximum width */
-      height: 100px; /* Slightly larger height */
+      visibility: hidden; /* Hidden by default */
+      width: 70%; /* Increased size */
+      max-width: 210px; /* Increased maximum width */
+      height: 120px; /* Increased height */
       border: 2px dashed #007bff;
       border-radius: 8px;
       display: flex;
@@ -99,6 +99,13 @@
       font-size: 14px; /* Adjusted font size */
       color: #007bff;
       margin-bottom: 10px;
+    }
+    /* Style for the disclaimer text */
+    #disclaimer {
+      font-size: 12px;
+      color: #888;
+      margin-top: 20px;
+      text-align: center;
     }
   </style>
 </head>
@@ -118,8 +125,14 @@
     <button onclick="window.location.href='index.html'">Main Page</button>
   </div>
   <div id="consoleOutput"></div>
-  <div id="version">Version 0.029</div>
+  <div id="version">Version 0.031</div>
   <div style="font-size: 12px; color: gray; margin-top: 20px;">&copy; 2025 Barcode Masters. All rights reserved.</div>
+  
+  <!-- Disclaimer text about QR codes -->
+  <div id="disclaimer">
+    <p>* Please note: The scanner currently only supports QR codes as barcode functionality is temporarily broken.</p>
+  </div>
+
   <script type="module">
     import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?v=1.018";
 
