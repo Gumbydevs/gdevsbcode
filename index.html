@@ -63,6 +63,7 @@
 
     // Start scanning when the button is clicked
     scanButton.addEventListener("click", () => {
+      console.log("Scan button clicked.");
       // Reset previous scan state
       barcodeScanned = false;
       message.textContent = "";
@@ -75,13 +76,22 @@
 
       // Get the available video devices (cameras)
       ZXing.BrowserCodeReader.listVideoDevices().then((videoInputDevices) => {
-        selectedDeviceId = videoInputDevices[0].deviceId; // Choose the first camera
-        startScanning();
+        console.log("Available video devices:", videoInputDevices);
+        if (videoInputDevices.length > 0) {
+          selectedDeviceId = videoInputDevices[0].deviceId; // Choose the first camera
+          startScanning();
+        } else {
+          message.textContent = "No camera devices found.";
+        }
+      }).catch((error) => {
+        console.error("Error accessing video devices:", error);
+        message.textContent = "Error accessing camera.";
       });
     });
 
     // Start scanning function
     function startScanning() {
+      console.log("Starting scan...");
       codeReader
         .decodeFromVideoDevice(selectedDeviceId, video, (result, error) => {
           if (result && !barcodeScanned) {
@@ -92,19 +102,23 @@
             forceScanButton.style.display = "none"; // Hide the force scan button
             scanButton.disabled = false; // Re-enable the button
             message.textContent = `Scan Success: ${result.text} (Type: ${result.format})`;
+            console.log("Scan Success:", result);
           }
 
           if (error && !barcodeScanned) {
             message.textContent = "Scanning error or no barcode/QR code detected!";
+            console.log("Error during scan:", error);
           }
         })
         .catch((err) => {
+          console.error("Error starting scanning:", err);
           message.textContent = "Error accessing the camera.";
         });
     }
 
     // Force scan button to manually capture image and stop scanning
     forceScanButton.addEventListener("click", () => {
+      console.log("Force scan button clicked.");
       codeReader.reset(); // Manually stop scanning
       message.textContent = "Scan process was manually stopped.";
       video.style.display = "none"; // Hide the video feed
