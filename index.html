@@ -70,14 +70,16 @@
   <div style="font-size: 12px; color: gray; margin-top: 20px;">&copy; 2025 Barcode Masters. All rights reserved.</div>
 
   <script>
-    // Handle Google Login
-    function handleClientLoad() {
+    // Ensure Google API client is loaded
+    window.onload = function() {
       gapi.load('auth2', function() {
         gapi.auth2.init({
           client_id: '165878256929-9duhr0ip79qltaaa7inoedheqtbdnr20.apps.googleusercontent.com',
         }).then(function() {
-          // Setup Google sign-in button
+          console.log("Google API initialized successfully!");
+          // Set up Google sign-in button
           document.getElementById('googleSignInBtn').addEventListener('click', function() {
+            console.log("Attempting to sign in...");
             gapi.auth2.getAuthInstance().signIn().then(function(googleUser) {
               const profile = googleUser.getBasicProfile();
               const userId = profile.getId();
@@ -89,14 +91,15 @@
               localStorage.setItem('userEmail', userEmail);
               // Redirect to home page
               window.location.href = 'home.html';
+            }).catch(function(error) {
+              console.log("Error during sign-in:", error);
             });
           });
+        }).catch(function(error) {
+          console.log("Error initializing Google API:", error);
         });
       });
-    }
-    
-    // Load Google API Client
-    handleClientLoad();
+    };
   </script>
 </body>
 </html>
