@@ -9,6 +9,11 @@
       font-family: Arial, sans-serif;
       text-align: center;
       margin-top: 50px;
+      background-color: #f0f0f0; /* Added background to check visibility */
+      height: 100vh; /* Ensures the body takes full height */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     .button {
       padding: 15px 30px;
@@ -50,10 +55,12 @@
   <div id="version">Version 1.018</div>
 
   <script>
-    // Here you can dynamically set the player name and ID from your game logic or local storage.
+    // Checking if the script runs correctly
+    console.log("Page Loaded");
+
+    // Dynamically set the player name and ID from game logic or local storage
     document.getElementById('playerName').textContent = "Gumby";  // Example name
     document.getElementById('playerID').textContent = "1001";  // Example ID
   </script>
 </body>
 </html>
-
