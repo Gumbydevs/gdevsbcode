@@ -76,12 +76,17 @@
       console.log(msg);
     }
 
+    // Function to generate a unique ID from the barcode text
+    function generateUniqueID(barcodeText) {
+      return barcodeText.slice(0, 20); // Limit to first 20 characters
+    }
+
     // Start scanning
     scanButton.addEventListener("click", async () => {
       message.textContent = "";
       consoleOutput.textContent = "";
 
-      // Initialize the barcode reader
+      // Initialize the barcode reader only once
       if (!codeReader) {
         codeReader = new BrowserMultiFormatReader();
       }
@@ -100,11 +105,15 @@
         const selectedDeviceId = devices[0].deviceId;
         logToConsole(`Using device: ${devices[0].label}`);
 
+        // Enable autofocus on the video element (this may depend on the camera itself)
+        video.setAttribute("autofocus", "true");
+
         // Start decoding
         codeReader.decodeFromVideoDevice(selectedDeviceId, video, (result, error) => {
           if (result) {
-            logToConsole(`Barcode Detected: ${result.text}`);
-            message.textContent = `Scan Successful: ${result.text}`;
+            const uniqueID = generateUniqueID(result.text);
+            logToConsole(`Barcode Detected: ${result.text} (Unique ID: ${uniqueID})`);
+            message.textContent = `Scan Successful: ${result.text} (ID: ${uniqueID})`;
             codeReader.reset(); // Stop scanning after success
           } else if (error) {
             logToConsole(`Error or no barcode detected: ${error.message}`);
@@ -114,6 +123,17 @@
         logToConsole(`Error initializing scanner: ${err.message}`);
         message.textContent = `Error: ${err.message}`;
       }
+
+      // Disable the scan button once clicked (so it cannot be clicked again)
+      scanButton.disabled = true;
+      // Force the scan to start immediately when button is clicked
+      scanButton.textContent = "Scanning...";
+
+      // Re-enable the button after a successful scan or error
+      setTimeout(() => {
+        scanButton.disabled = false;
+        scanButton.textContent = "Click to Scan Barcode";
+      }, 5000); // After 5 seconds or scanning ends
     });
 
     // Cleanup when page is closed
