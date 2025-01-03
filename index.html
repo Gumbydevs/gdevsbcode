@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Scanner - Version 1.01214</title>
+  <title>Barcode Scanner - Version 1.01215</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -72,20 +72,23 @@
   <video id="video" autoplay></video>
   <div id="message"></div>
   <div id="consoleOutput"></div>
-  <div id="version">Version 1.01214</div>
+  <div id="version">Version 1.01215</div>
 
-  <script type="module">
-    import { BrowserMultiFormatReader } from 'https://unpkg.com/@zxing/browser@latest';
+  <script>
+    // Load the ZXing library from CDN
+    const script = document.createElement("script");
+    script.src = "https://unpkg.com/@zxing/browser@latest/dist/index.min.js";
+    script.onload = initializeScanner;
+    document.body.appendChild(script);
 
+    let codeReader;
+    let barcodeScanned = false;
+    let focusInterval;
     const video = document.getElementById("video");
     const scanButton = document.getElementById("scanButton");
     const forceScanButton = document.getElementById("forceScanButton");
     const message = document.getElementById("message");
     const consoleOutput = document.getElementById("consoleOutput");
-
-    let codeReader;
-    let barcodeScanned = false;
-    let focusInterval;
 
     // Debug logging function to show messages on the webpage
     function logToConsole(msg) {
@@ -115,79 +118,81 @@
       return Math.random().toString(36).substr(2, 20);
     }
 
-    // Start scanning
-    scanButton.addEventListener("click", async () => {
-      logToConsole("Button clicked - starting scan...");
-      barcodeScanned = false;
-      message.textContent = "";
+    // Initialize the ZXing reader and setup event listeners
+    function initializeScanner() {
+      // Initialize Barcode reader
+      codeReader = new ZXing.BrowserMultiFormatReader();
+      logToConsole("Barcode reader initialized...");
 
-      video.style.display = "block";
-      scanButton.style.display = "none";
-      forceScanButton.style.display = "inline-block";
+      scanButton.addEventListener("click", async () => {
+        logToConsole("Button clicked - starting scan...");
+        barcodeScanned = false;
+        message.textContent = "";
 
-      try {
-        // Initialize Barcode reader
-        codeReader = new BrowserMultiFormatReader();
-        logToConsole("Barcode reader initialized...");
+        video.style.display = "block";
+        scanButton.style.display = "none";
+        forceScanButton.style.display = "inline-block";
 
-        // Get list of video input devices
-        const devices = await codeReader.listVideoInputDevices();
-        if (devices.length === 0) {
-          logToConsole("No camera devices found.");
-          message.textContent = "Error: No camera devices available.";
-          return;
-        }
-
-        // Find the back camera (usually the second camera in the list)
-        const backCamera = devices.find(device => device.label.toLowerCase().includes("back"));
-        const selectedDeviceId = backCamera ? backCamera.deviceId : devices[0].deviceId;
-
-        logToConsole(`Using device: ${devices.find(device => device.deviceId === selectedDeviceId).label}`);
-
-        // Start scanning from the selected video input device
-        await codeReader.decodeFromVideoDevice(selectedDeviceId, video, (result, error) => {
-          if (result) {
-            if (!barcodeScanned) {
-              barcodeScanned = true;
-              const resultData = result.text || "Unknown format";
-              const uniqueId = generateUniqueId();
-              message.textContent = `Scan Successful: ${resultData} (ID: ${uniqueId})`;
-              logToConsole(`Scan Successful: ${resultData} (ID: ${uniqueId})`);
-              codeReader.reset(); // Stop scanning after success
-              stopContinuousAutofocus();
-              video.style.display = "none";
-              scanButton.style.display = "inline-block";
-              forceScanButton.style.display = "none";
-            }
-          } else if (error) {
-            logToConsole(`Error or no barcode detected: ${error.message}`);
+        try {
+          // Get list of video input devices
+          const devices = await codeReader.listVideoInputDevices();
+          if (devices.length === 0) {
+            logToConsole("No camera devices found.");
+            message.textContent = "Error: No camera devices available.";
+            return;
           }
-        });
 
-        startContinuousAutofocus();
-        logToConsole("Barcode scanner started...");
-      } catch (error) {
-        logToConsole(`Error: ${error.message}`);
-      }
-    });
+          // Find the back camera (usually the second camera in the list)
+          const backCamera = devices.find(device => device.label.toLowerCase().includes("back"));
+          const selectedDeviceId = backCamera ? backCamera.deviceId : devices[0].deviceId;
 
-    // Force Scan Button click event
-    forceScanButton.addEventListener("click", async () => {
-      logToConsole("Force Scan button clicked...");
-      if (codeReader) {
-        const result = await codeReader.decodeFromVideoDevice();
-        const resultData = result?.text || "No barcode detected";
-        const uniqueId = generateUniqueId();
-        message.textContent = `Force Scan Result: ${resultData} (ID: ${uniqueId})`;
-        logToConsole(`Force Scan Result: ${resultData} (ID: ${uniqueId})`);
-      }
-    });
+          logToConsole(`Using device: ${devices.find(device => device.deviceId === selectedDeviceId).label}`);
 
-    // Cleanup when page is closed
-    window.addEventListener("beforeunload", () => {
-      if (codeReader) codeReader.reset();
-      stopContinuousAutofocus();
-    });
+          // Start scanning from the selected video input device
+          await codeReader.decodeFromVideoDevice(selectedDeviceId, video, (result, error) => {
+            if (result) {
+              if (!barcodeScanned) {
+                barcodeScanned = true;
+                const resultData = result.text || "Unknown format";
+                const uniqueId = generateUniqueId();
+                message.textContent = `Scan Successful: ${resultData} (ID: ${uniqueId})`;
+                logToConsole(`Scan Successful: ${resultData} (ID: ${uniqueId})`);
+                codeReader.reset(); // Stop scanning after success
+                stopContinuousAutofocus();
+                video.style.display = "none";
+                scanButton.style.display = "inline-block";
+                forceScanButton.style.display = "none";
+              }
+            } else if (error) {
+              logToConsole(`Error or no barcode detected: ${error.message}`);
+            }
+          });
+
+          startContinuousAutofocus();
+          logToConsole("Barcode scanner started...");
+        } catch (error) {
+          logToConsole(`Error: ${error.message}`);
+        }
+      });
+
+      // Force Scan Button click event
+      forceScanButton.addEventListener("click", async () => {
+        logToConsole("Force Scan button clicked...");
+        if (codeReader) {
+          const result = await codeReader.decodeFromVideoDevice();
+          const resultData = result?.text || "No barcode detected";
+          const uniqueId = generateUniqueId();
+          message.textContent = `Force Scan Result: ${resultData} (ID: ${uniqueId})`;
+          logToConsole(`Force Scan Result: ${resultData} (ID: ${uniqueId})`);
+        }
+      });
+
+      // Cleanup when page is closed
+      window.addEventListener("beforeunload", () => {
+        if (codeReader) codeReader.reset();
+        stopContinuousAutofocus();
+      });
+    }
   </script>
 </body>
 </html>
