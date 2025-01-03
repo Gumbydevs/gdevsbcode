@@ -90,7 +90,8 @@
             qrScanner.stop(); // Stop the scanner
             video.style.display = "none"; // Hide the video feed
             scanButton.style.display = "inline-block"; // Show the button again
-            message.textContent = `Barcode Scanned: ${result}`;
+            message.textContent = `Scan Success! Barcode: ${result}`;
+            console.log("Barcode scanned: ", result); // For debugging, check if result is captured
           }
         },
         {
