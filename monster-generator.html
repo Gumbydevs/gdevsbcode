@@ -55,6 +55,20 @@
       color: #333;
       text-align: center;
     }
+    #monsterInfo {
+      background-color: #eef;
+      padding: 15px;
+      border: 2px solid #007bff;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+    }
+    #monsterInfo div {
+      margin: 5px 0;
+    }
+    .info-item {
+      font-weight: bold;
+    }
     #consoleOutput {
       font-size: 14px;
       margin-top: 20px;
@@ -65,12 +79,6 @@
       width: 90%;
       max-width: 400px;
       border-radius: 8px;
-    }
-    .info-item {
-      font-weight: bold;
-    }
-    .info-value {
-      margin-left: 5px;
     }
     #version {
       font-size: 14px;
@@ -116,6 +124,38 @@
       console.log(msg);
     }
 
+    function generateMonster(barcode) {
+      const monsterID = Math.random().toString(36).substr(2, 15).toUpperCase();
+      const names = ["Zylar", "Grunth", "Floran", "Drixel", "Morzar", "Klynn", "Valkar", "Threx", "Oblis", "Xentor"];
+      const randomName = names[Math.floor(Math.random() * names.length)];
+      const level = Math.random() < 0.8 ? 1 : Math.random() < 0.95 ? 2 : 3;
+      const hp = Math.floor(Math.random() * 20 + 10) * level;
+      const ap = Math.floor(Math.random() * 10 + 5) * level;
+      const speed = Math.floor(Math.random() * 5 + 1) * level;
+
+      return {
+        id: monsterID,
+        name: randomName,
+        hp,
+        ap,
+        speed,
+        level,
+        barcode,
+      };
+    }
+
+    function displayMonsterInfo(monster) {
+      monsterInfo.innerHTML = `
+        <div><span class="info-item">ID:</span> <span class="info-value">${monster.id}</span></div>
+        <div><span class="info-item">Name:</span> <span class="info-value">${monster.name}</span></div>
+        <div><span class="info-item">Level:</span> <span class="info-value">${monster.level}</span></div>
+        <div><span class="info-item">HP:</span> <span class="info-value">${monster.hp}</span></div>
+        <div><span class="info-item">AP:</span> <span class="info-value">${monster.ap}</span></div>
+        <div><span class="info-item">Speed:</span> <span class="info-value">${monster.speed}</span></div>
+        <div><span class="info-item">Source Code:</span> <span class="info-value">${monster.barcode}</span></div>
+      `;
+    }
+
     scanButton.addEventListener("click", async () => {
       barcodeScanned = false;
       message.textContent = "Scanning...";
@@ -132,6 +172,9 @@
               scanButton.style.display = "block";
               forceScanButton.style.display = "none";
               logToConsole(`Scan Result: ${result.data}`);
+
+              const monster = generateMonster(result.data);
+              displayMonsterInfo(monster);
             }
           },
           {
