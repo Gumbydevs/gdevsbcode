@@ -90,7 +90,7 @@
   
   <!-- Buttons Section for other game areas -->
   <div class="buttons">
-    <button class="button" onclick="window.location.href='fighter-collection.html'">Fighter Collection</button>
+    <button class="button" onclick="window.location.href='monster-collection.html'">Fighter Collection</button>
     <button class="button" onclick="window.location.href='monster-training.html'">Monster Training</button>
     <button class="button" onclick="window.location.href='pvp-battle.html'">PVP Battle</button>
     <button class="button" onclick="window.location.href='help.html'">Help</button>
@@ -185,6 +185,17 @@
     function addMonsterToCollection(monster) {
       player.monsterCollection.push(monster);
       logToConsole(`Monster added to collection: ${monster.name}`);
+      alert("Monster has been added to your collection!");
+    }
+
+    // Prompt user to add monster to collection
+    function promptToAddMonster(monster) {
+      const confirmAdd = confirm(`Do you want to add ${monster.name} to your collection?`);
+      if (confirmAdd) {
+        addMonsterToCollection(monster);
+      } else {
+        alert(`You chose not to add ${monster.name}.`);
+      }
     }
 
     // Start scanning QR code
@@ -221,9 +232,6 @@
                 stats: stats
               };
 
-              // Add monster to player's collection
-              addMonsterToCollection(monster);
-
               // Update the message with nicely formatted monster info
               message.textContent = `Scan Successful: ${resultData}`;
               monsterInfo.innerHTML = ` 
@@ -241,6 +249,9 @@
               video.style.display = "none";
               scanButton.style.display = "inline-block";
               forceScanButton.style.display = "none";
+
+              // Prompt user to add the monster to collection
+              promptToAddMonster(monster);
             }
           },
           {
