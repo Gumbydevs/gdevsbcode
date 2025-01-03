@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Scanner</title>
+  <title>Barcode Scanner / Monster Generator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -104,6 +104,9 @@
       // Show video and start scanning
       video.style.display = "block";
 
+      // Log the scan button click
+      logToConsole("Button clicked - starting scan process.");
+
       // Initialize QR Scanner
       qrScanner = new QrScanner(
         video,
@@ -124,8 +127,14 @@
       );
 
       logToConsole("QR Scanner starting...");
-
-      qrScanner.start();
+      
+      // Start scanning and log the status
+      try {
+        qrScanner.start();
+        logToConsole("QR Scanner has started.");
+      } catch (error) {
+        logToConsole(`Error starting scanner: ${error.message}`);
+      }
     });
 
     // Cleanup when the page is closed
