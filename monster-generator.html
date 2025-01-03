@@ -114,6 +114,7 @@
     let qrScanner;
     let barcodeScanned = false;
     let focusInterval;
+    let quaggaScanner;
 
     // Debug logging function to show messages on the webpage
     function logToConsole(msg) {
@@ -175,7 +176,7 @@
       return "MONSTER-" + id; // Simple but unique ID based on barcode content
     }
 
-    // Start scanning
+    // Start scanning QR code
     scanButton.addEventListener("click", async () => {
       logToConsole("Button clicked - starting scan...");
       barcodeScanned = false;
