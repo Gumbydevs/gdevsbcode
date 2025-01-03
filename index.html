@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Scanner - Version 1.01225</title>
+  <title>Barcode Scanner - Version 1.01226</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -73,7 +73,7 @@
   <video id="video" autoplay></video>
   <div id="message"></div>
   <div id="consoleOutput"></div>
-  <div id="version">Version 1.01225</div>
+  <div id="version">Version 1.01226</div>
 
   <script>
     // Direct import from ZXing CDN
@@ -137,6 +137,7 @@
 
           // Start scanning from the video input
           const devices = await codeReader.listVideoInputDevices();
+          logToConsole(`Devices found: ${devices.length}`);
           if (devices.length === 0) {
             logToConsole("No camera devices found.");
             message.textContent = "Error: No camera devices available.";
@@ -150,9 +151,11 @@
             video: { deviceId: { exact: selectedDeviceId } },
           });
           video.srcObject = stream; // Attach the stream to the video element
+          logToConsole("Video stream attached to video element.");
 
           await codeReader.decodeFromVideoDevice(selectedDeviceId, video, (result, error) => {
             if (result) {
+              logToConsole("Barcode detected!");
               if (!barcodeScanned) {
                 barcodeScanned = true;
                 const resultData = result.text || "Unknown format";
