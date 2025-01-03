@@ -141,7 +141,7 @@
         const selectedDeviceId = devices[0].deviceId;
         logToConsole(`Using device: ${devices[0].label}`);
 
-        codeReader.decodeFromVideoDevice(selectedDeviceId, video, (result, error) => {
+        await codeReader.decodeFromVideoDevice(selectedDeviceId, video, (result, error) => {
           if (result) {
             if (!barcodeScanned) {
               barcodeScanned = true;
