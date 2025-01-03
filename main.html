@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barcode Masters - Landing Page - Version 1.018</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      text-align: center;
+    }
+    .main-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 80%;
+      padding: 20px;
+      background-color: #ffffff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+    header img {
+      width: 275px;
+      height: 264px;
+    }
+    .player-info {
+      font-size: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      margin-left: 20px;
+    }
+    .player-info p {
+      margin: 5px 0;
+    }
+    .player-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-color: #d0d0d0;
+      margin-bottom: 10px;
+    }
+    .button {
+      padding: 12px 25px;
+      font-size: 16px;
+      margin: 5px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    .button:hover {
+      background-color: #0056b3;
+    }
+    #version {
+      font-size: 12px;
+      color: gray;
+      margin-top: 20px;
+    }
+    .game-explanation {
+      font-size: 16px;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    /* Mobile adjustments */
+    @media (max-width: 768px) {
+      .main-header {
+        flex-direction: column;
+        align-items: center;
+      }
+      header img {
+        width: 150px; /* Further shrink the logo for mobile */
+        height: auto;
+        margin-bottom: 20px;
+      }
+      .player-info {
+        align-items: center;
+        margin-left: 0;
+      }
+      .player-avatar {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 10px;
+      }
+      .button {
+        padding: 10px 20px;
+        font-size: 14px;
+      }
+      #version {
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="main-header">
+    <!-- Logo on the left -->
+    <header>
+      <img src="BarcodeLogo1.PNG" alt="Barcode Masters Logo">
+    </header>
+
+    <!-- Player Info on the right -->
+    <div class="player-info">
+      <div class="player-avatar"></div> <!-- Placeholder for Player Avatar -->
+      <p><strong>Player Name:</strong> <span id="playerName">Player One</span></p>
+      <p><strong>Player ID:</strong> <span id="playerID">1234567890</span></p>
+      <p><strong>Wins:</strong> <span id="playerWins">0</span></p>
+      <p><strong>Losses:</strong> <span id="playerLosses">0</span></p>
+      <p><strong>Monsters Collected:</strong> <span id="playerMonsters">0</span></p>
+    </div>
+  </div>
+
+  <div class="game-explanation">
+    <p>Scan barcodes, unlock unique creatures, and battle them in thrilling PVP fights! Collect, train, and evolve your creatures as you rise to become the ultimate Barcode Master.</p>
+  </div>
+
+  <div>
+    <button class="button" onclick="window.location.href='monster-generator.html'">DNA Extractor</button>
+    <button class="button" onclick="window.location.href='monster-collection.html'">Monster Collection</button>
+    <button class="button" onclick="window.location.href='monster-training.html'">Monster Training</button>
+    <button class="button" onclick="window.location.href='pvp-battle.html'">PVP Battle</button>
+  
+    <!-- Added Help Button -->
+    <button class="button" onclick="window.location.href='help.html'">Help</button>
+  </div>
+
+  <div id="version">Prototype Version 1.018</div>
+  <div style="font-size: 12px; color: gray; margin-top: 20px;">&copy; 2025 Barcode Masters. All rights reserved.</div>
+
+  <script>
+    // Checking if the script runs correctly
+    console.log("Page Loaded");
+
+    // Dynamically set the player name and ID from game logic or local storage
+    document.getElementById('playerName').textContent = "Gumby";  // Example name
+    document.getElementById('playerID').textContent = "1001";  // Example ID
+    document.getElementById('playerWins').textContent = "5";  // Example wins
+    document.getElementById('playerLosses').textContent = "2";  // Example losses
+    document.getElementById('playerMonsters').textContent = "10";  // Example monsters collected
+  </script>
+</body>
+</html>
