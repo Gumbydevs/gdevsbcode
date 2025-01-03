@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Scanner - Version 1.01227</title>
+  <title>Barcode Scanner - Version 1.01224</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -72,133 +72,123 @@
   <video id="video" autoplay></video>
   <div id="message"></div>
   <div id="consoleOutput"></div>
-  <div id="version">Version 1.01227</div>
+  <div id="version">Version 1.01224</div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 
   <script>
-    console.log("Script loading...");
+    const video = document.getElementById("video");
+    const scanButton = document.getElementById("scanButton");
+    const forceScanButton = document.getElementById("forceScanButton");
+    const message = document.getElementById("message");
+    const consoleOutput = document.getElementById("consoleOutput");
 
-    // New ZXing CDN link (another version of ZXing)
-    const script = document.createElement('script');
-    script.src = "https://cdn.jsdelivr.net/npm/@zxing/library@0.18.5/dist/index.min.js";  // Try a different version
-    document.head.appendChild(script);
+    let barcodeScanned = false;
+    let focusInterval;
 
-    script.onload = () => {
-      console.log("ZXing library loaded successfully."); // Check if the library loaded
-      
-      const video = document.getElementById("video");
-      const scanButton = document.getElementById("scanButton");
-      const forceScanButton = document.getElementById("forceScanButton");
-      const message = document.getElementById("message");
-      const consoleOutput = document.getElementById("consoleOutput");
+    // Debug logging function to show messages on the webpage
+    function logToConsole(msg) {
+      const logMessage = document.createElement('div');
+      logMessage.textContent = msg;
+      consoleOutput.appendChild(logMessage);
+      console.log(msg);
+    }
 
-      let codeReader;
-      let barcodeScanned = false;
-      let focusInterval;
+    // Start scanning
+    scanButton.addEventListener("click", () => {
+      logToConsole("Button clicked - starting scan...");
+      barcodeScanned = false;
+      message.textContent = "";
 
-      // Debug logging function to show messages on the webpage
-      function logToConsole(msg) {
-        const logMessage = document.createElement('div');
-        logMessage.textContent = msg;
-        consoleOutput.appendChild(logMessage);
-        console.log(msg);
-      }
+      video.style.display = "block";
+      scanButton.style.display = "none";
+      forceScanButton.style.display = "inline-block";
 
-      // Continuous autofocus adjustment
-      function startContinuousAutofocus() {
-        if (focusInterval) clearInterval(focusInterval);
-        focusInterval = setInterval(() => {
-          const track = video.srcObject?.getVideoTracks()[0];
-          if (track) {
-            track.applyConstraints({ advanced: [{ focusMode: "continuous" }] });
+      // Start QuaggaJS to begin scanning
+      Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: video,    // Video element to display the live stream
+          constraints: {
+            facingMode: "environment"  // Use the back camera on mobile devices
           }
-        }, 2000);
-      }
+        },
+        decoder: {
+          readers: ["code_128_reader", "ean_reader", "ean_8_reader", "upc_reader", "upc_e_reader", "code_39_reader", "codabar_reader", "i2of5_reader", "2of5_reader", "qr_reader"] // List of barcode formats
+        }
+      }, function(err) {
+        if (err) {
+          logToConsole(`Error initializing Quagga: ${err}`);
+          return;
+        }
 
-      function stopContinuousAutofocus() {
-        if (focusInterval) clearInterval(focusInterval);
-      }
+        // Start the scanner
+        Quagga.start();
+        logToConsole("Barcode scanner started...");
 
-      // Generate unique ID (20 characters)
-      function generateUniqueId() {
-        return Math.random().toString(36).substr(2, 20);
-      }
+        // Continuous focus adjustment (if needed)
+        startContinuousAutofocus();
+      });
 
-      // Start scanning
-      scanButton.addEventListener("click", async () => {
-        console.log("Scan button clicked.");
-        logToConsole("Button clicked - starting scan...");
-        barcodeScanned = false;
-        message.textContent = "";
-
-        video.style.display = "block";
-        scanButton.style.display = "none";
-        forceScanButton.style.display = "inline-block";
-
-        try {
-          // Initialize Barcode reader
-          codeReader = new ZXing.BrowserMultiFormatReader();
-          logToConsole("Barcode reader initialized...");
-
-          // Start scanning from the video input
-          const devices = await codeReader.listVideoInputDevices();
-          if (devices.length === 0) {
-            logToConsole("No camera devices found.");
-            message.textContent = "Error: No camera devices available.";
-            return;
-          }
-
-          const selectedDeviceId = devices[0].deviceId;
-          logToConsole(`Using device: ${devices[0].label}`);
-
-          await codeReader.decodeFromVideoDevice(selectedDeviceId, video, (result, error) => {
-            if (result) {
-              if (!barcodeScanned) {
-                barcodeScanned = true;
-                const resultData = result.text || "Unknown format";
-                const uniqueId = generateUniqueId();
-                message.textContent = `Scan Successful: ${resultData} (ID: ${uniqueId})`;
-                logToConsole(`Scan Successful: ${resultData} (ID: ${uniqueId})`);
-                codeReader.reset(); // Stop scanning after success
-                stopContinuousAutofocus();
-                video.style.display = "none";
-                scanButton.style.display = "inline-block";
-                forceScanButton.style.display = "none";
-              }
-            } else if (error) {
-              logToConsole(`Error or no barcode detected: ${error.message}`);
-            }
-          });
-
-          startContinuousAutofocus();
-          logToConsole("Barcode scanner started...");
-        } catch (error) {
-          logToConsole(`Error: ${error.message}`);
+      // Handle successful barcode scan
+      Quagga.onDetected((result) => {
+        if (!barcodeScanned) {
+          barcodeScanned = true;
+          const resultData = result.codeResult.code || "Unknown format";
+          message.textContent = `Scan Successful: ${resultData}`;
+          logToConsole(`Scan Successful: ${resultData}`);
+          Quagga.stop(); // Stop scanning after successful scan
+          video.style.display = "none";
+          scanButton.style.display = "inline-block";
+          forceScanButton.style.display = "none";
         }
       });
 
-      // Force Scan Button click event
-      forceScanButton.addEventListener("click", async () => {
-        logToConsole("Force Scan button clicked...");
-        if (codeReader) {
-          const result = await codeReader.decodeFromVideoDevice();
-          const resultData = result?.text || "No barcode detected";
-          const uniqueId = generateUniqueId();
-          message.textContent = `Force Scan Result: ${resultData} (ID: ${uniqueId})`;
-          logToConsole(`Force Scan Result: ${resultData} (ID: ${uniqueId})`);
+      // Handle scan error
+      Quagga.onProcessed(function(result) {
+        if (result && result.codeResult) {
+          logToConsole(`Scanning: ${result.codeResult.code}`);
+        } else {
+          logToConsole("Error: No barcode detected.");
         }
       });
+    });
 
-      // Cleanup when page is closed
-      window.addEventListener("beforeunload", () => {
-        if (codeReader) codeReader.reset();
-        stopContinuousAutofocus();
-      });
-    };
+    // Force Scan Button click event
+    forceScanButton.addEventListener("click", async () => {
+      logToConsole("Force Scan button clicked...");
+      if (Quagga) {
+        const result = await Quagga.decodeSingle({
+          src: video,
+          numOfWorkers: 0,
+          decoder: {
+            readers: ["code_128_reader", "ean_reader", "ean_8_reader", "upc_reader", "upc_e_reader", "code_39_reader", "codabar_reader", "i2of5_reader", "2of5_reader", "qr_reader"]
+          }
+        });
+        const resultData = result?.codeResult.code || "No barcode detected";
+        const uniqueId = generateUniqueId();
+        message.textContent = `Force Scan Result: ${resultData} (ID: ${uniqueId})`;
+        logToConsole(`Force Scan Result: ${resultData} (ID: ${uniqueId})`);
+      }
+    });
 
-    // Debugging the script load status in case the script fails
-    script.onerror = () => {
-      console.log("Failed to load ZXing script.");
-    };
+    // Continuous autofocus adjustment
+    function startContinuousAutofocus() {
+      if (focusInterval) clearInterval(focusInterval);
+      focusInterval = setInterval(() => {
+        const track = video.srcObject?.getVideoTracks()[0];
+        if (track) {
+          track.applyConstraints({ advanced: [{ focusMode: "continuous" }] });
+        }
+      }, 2000);
+    }
+
+    // Cleanup when page is closed
+    window.addEventListener("beforeunload", () => {
+      Quagga.stop();  // Stop Quagga when leaving the page
+      if (focusInterval) clearInterval(focusInterval);
+    });
   </script>
 </body>
 </html>
