@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Scanner - Version 1.01227</title>
+  <title>Barcode Scanner - Version 1.01228</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,7 +13,7 @@
     #video {
       width: 100%;
       max-width: 400px;
-      display: none;
+      display: block;
       margin: 10px auto;
       background-color: black;
     }
@@ -32,21 +32,6 @@
       border-radius: 5px;
     }
     #scanButton:disabled {
-      background-color: #6c757d;
-      cursor: not-allowed;
-    }
-    #forceScanButton {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-      display: none;
-      margin-top: 10px;
-    }
-    #forceScanButton:disabled {
       background-color: #6c757d;
       cursor: not-allowed;
     }
@@ -69,11 +54,10 @@
 <body>
   <h1>Barcode Scanner</h1>
   <button id="scanButton">Click to Scan Barcode</button>
-  <button id="forceScanButton">Force Scan</button>
   <video id="video" autoplay></video>
   <div id="message"></div>
   <div id="consoleOutput"></div>
-  <div id="version">Version 1.01227</div>
+  <div id="version">Version 1.01228</div>
 
   <script>
     // Direct import from ZXing CDN
@@ -84,12 +68,10 @@
     script.onload = () => {
       const video = document.getElementById("video");
       const scanButton = document.getElementById("scanButton");
-      const forceScanButton = document.getElementById("forceScanButton");
       const message = document.getElementById("message");
       const consoleOutput = document.getElementById("consoleOutput");
 
       let codeReader;
-      let barcodeScanned = false;
 
       // Debug logging function to show messages on the webpage
       function logToConsole(msg) {
@@ -102,12 +84,7 @@
       // Start scanning when the scan button is clicked
       scanButton.addEventListener("click", async () => {
         logToConsole("Button clicked - starting scan...");
-        barcodeScanned = false;
         message.textContent = "";
-
-        video.style.display = "block"; // Ensure it's visible
-        scanButton.style.display = "none";
-        forceScanButton.style.display = "inline-block";
 
         try {
           logToConsole("Initializing Barcode reader...");
@@ -138,37 +115,16 @@
           await codeReader.decodeFromVideoDevice(selectedDeviceId, video, (result, error) => {
             if (result) {
               logToConsole("Barcode detected!");
-              if (!barcodeScanned) {
-                barcodeScanned = true;
-                const resultData = result.text || "Unknown format";
-                message.textContent = `Scan Successful: ${resultData}`;
-                logToConsole(`Scan Successful: ${resultData}`);
-                codeReader.reset(); // Stop scanning after success
-                video.style.display = "none";
-                scanButton.style.display = "inline-block";
-                forceScanButton.style.display = "none";
-              }
+              const resultData = result.text || "Unknown format";
+              message.textContent = `Scan Successful: ${resultData}`;
+              logToConsole(`Scan Successful: ${resultData}`);
+              codeReader.reset(); // Stop scanning after success
             } else if (error) {
               logToConsole(`Error or no barcode detected: ${error.message}`);
             }
           });
         } catch (error) {
           logToConsole(`Error: ${error.message}`);
-        }
-      });
-
-      // Force Scan Button click event
-      forceScanButton.addEventListener("click", async () => {
-        logToConsole("Force Scan button clicked...");
-        if (codeReader) {
-          try {
-            const result = await codeReader.decodeFromVideoDevice();
-            const resultData = result?.text || "No barcode detected";
-            message.textContent = `Force Scan Result: ${resultData}`;
-            logToConsole(`Force Scan Result: ${resultData}`);
-          } catch (error) {
-            logToConsole(`Error during force scan: ${error.message}`);
-          }
         }
       });
     };
