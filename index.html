@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Scanner - Version 1.018</title>
+  <title>Barcode Scanner - Version 1.0.19</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -56,7 +56,7 @@
   <video id="video" autoplay></video>
   <div id="message"></div>
   <div id="consoleOutput"></div>
-  <div id="version">Version 1.018</div>
+  <div id="version">Version 1.0.19</div>
 
   <script type="module">
     import { BrowserMultiFormatReader } from '@zxing/browser';
@@ -121,6 +121,8 @@
       if (codeReader) codeReader.reset();
     });
   </script>
-  <script src="https://unpkg.com/@zxing/browser"></script>
+
+  <!-- Added Cache Buster with versioning -->
+  <script src="https://unpkg.com/@zxing/browser?v=1.0.19"></script>
 </body>
 </html>
