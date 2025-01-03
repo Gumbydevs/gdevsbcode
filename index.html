@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Scanner / Monster Generator</title>
+  <title>Barcode Scanner</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -66,7 +66,7 @@
   </style>
 </head>
 <body>
-  <h1>Monster Generator: Barcode Scanner</h1>
+  <h1>Monster Creation: Barcode Scanner</h1>
   <button id="scanButton">Click to Scan Barcode</button>
   <video id="video" autoplay></video>
   <div id="message"></div>
@@ -75,15 +75,13 @@
   <div id="debugConsole"></div>
 
   <script type="module">
-    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js";
+    // Import quaggaJS for barcode scanning
+    import Quagga from "https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js";
 
     const video = document.getElementById("video");
     const scanButton = document.getElementById("scanButton");
     const message = document.getElementById("message");
     const debugConsole = document.getElementById("debugConsole");
-
-    let qrScanner;
-    let barcodeScanned = false;
 
     // Function to log messages to the debug console on the webpage
     function logToConsole(msg) {
@@ -95,11 +93,8 @@
 
     scanButton.addEventListener("click", () => {
       // Reset previous scan state
-      barcodeScanned = false;
       message.textContent = "";
-
-      // Hide the button while scanning
-      scanButton.style.display = "none";
+      scanButton.style.display = "none"; // Hide scan button during scan
 
       // Show video and start scanning
       video.style.display = "block";
@@ -107,40 +102,49 @@
       // Log the scan button click
       logToConsole("Button clicked - starting scan process.");
 
-      // Initialize QR Scanner
-      qrScanner = new QrScanner(
-        video,
-        (result) => {
-          logToConsole(`Scanned result: ${result}`); // Log scanned result on the page
-          if (!barcodeScanned) {
-            barcodeScanned = true; // Stop further scanning
-            qrScanner.stop(); // Stop the scanner
-            video.style.display = "none"; // Hide the video feed
-            scanButton.style.display = "inline-block"; // Show the button again
-            message.textContent = `Scan Success! Barcode: ${result}`;
-          }
+      // Initialize Quagga for barcode scanning
+      Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: video,  // Video element for live stream
+          constraints: {
+            facingMode: "environment"  // Use back camera
+          },
         },
-        {
-          highlightScanRegion: true,
-          maxScansPerSecond: 1, // Adjust the rate of scanning (to prevent too many scans in a short time)
+        decoder: {
+          readers: ["code_128_reader", "ean_reader", "upc_reader", "code_39_reader", "ean_8_reader", "upc_e_reader"] // Add other formats if necessary
         }
-      );
+      }, (err) => {
+        if (err) {
+          logToConsole("Error initializing scanner: " + err);
+          return;
+        }
 
-      logToConsole("QR Scanner starting...");
-      
-      // Start scanning and log the status
-      try {
-        qrScanner.start();
-        logToConsole("QR Scanner has started.");
-      } catch (error) {
-        logToConsole(`Error starting scanner: ${error.message}`);
-      }
+        logToConsole("Quagga initialized successfully.");
+
+        // Start scanning
+        Quagga.start();
+        logToConsole("Quagga started.");
+      });
+
+      // Listen for barcode scans
+      Quagga.onDetected((result) => {
+        const barcode = result.codeResult.code;
+        logToConsole("Scanned barcode: " + barcode);
+        
+        // Display success message and stop scanning
+        message.textContent = `Scan Success! Barcode: ${barcode}`;
+        Quagga.stop(); // Stop scanning once a barcode is detected
+        video.style.display = "none"; // Hide the video feed
+        scanButton.style.display = "inline-block"; // Show the button again
+      });
     });
 
     // Cleanup when the page is closed
     window.addEventListener("beforeunload", () => {
-      if (qrScanner) {
-        qrScanner.destroy();
+      if (Quagga) {
+        Quagga.stop();
       }
     });
   </script>
