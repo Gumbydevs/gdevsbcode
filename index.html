@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Masters - Login Page - Version 1.018</title>
+  <title>Barcode Masters - Login Page - Version 1.0181</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -66,11 +66,10 @@
   <!-- Google Sign-In button -->
   <button class="button" id="googleSignInBtn">Sign in with Google</button>
   
-  <div id="version">Prototype Version 1.018</div>
+  <div id="version">Prototype Version 1.0181</div>
   <div style="font-size: 12px; color: gray; margin-top: 20px;">&copy; 2025 Barcode Masters. All rights reserved.</div>
 
   <script>
-    // Handle Google Login
     function handleClientLoad() {
       gapi.load('auth2', function() {
         gapi.auth2.init({
@@ -91,12 +90,23 @@
               window.location.href = 'home.html';
             });
           });
+        }).catch(function(error) {
+          console.error("Error initializing Google API:", error);
         });
       });
     }
-    
-    // Load Google API Client
-    handleClientLoad();
+
+    // Load Google API Client and wait for it to be ready
+    function loadGoogleAPI() {
+      if (window.gapi) {
+        handleClientLoad();
+      } else {
+        setTimeout(loadGoogleAPI, 500); // Retry every 500ms until gapi is available
+      }
+    }
+
+    // Wait for gapi to load properly
+    loadGoogleAPI();
   </script>
 </body>
 </html>
