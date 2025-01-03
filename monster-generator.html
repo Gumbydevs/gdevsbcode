@@ -114,7 +114,12 @@
     let qrScanner;
     let barcodeScanned = false;
     let focusInterval;
-    let quaggaScanner;
+
+    // Assume there's a player object and their monster collection
+    let player = {
+      id: 'player1',
+      monsterCollection: []  // Collection of monsters
+    };
 
     // Debug logging function to show messages on the webpage
     function logToConsole(msg) {
@@ -176,6 +181,12 @@
       return "MONSTER-" + id; // Simple but unique ID based on barcode content
     }
 
+    // Add monster to the player's collection
+    function addMonsterToCollection(monster) {
+      player.monsterCollection.push(monster);
+      logToConsole(`Monster added to collection: ${monster.name}`);
+    }
+
     // Start scanning QR code
     scanButton.addEventListener("click", async () => {
       logToConsole("Button clicked - starting scan...");
@@ -201,6 +212,17 @@
 
               // Generate stats based on the level
               const stats = generateMonsterStats(level);
+
+              // Create the monster object
+              const monster = {
+                id: monsterId,
+                name: monsterName,
+                level: level,
+                stats: stats
+              };
+
+              // Add monster to player's collection
+              addMonsterToCollection(monster);
 
               // Update the message with nicely formatted monster info
               message.textContent = `Scan Successful: ${resultData}`;
