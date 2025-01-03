@@ -9,164 +9,88 @@
       font-family: Arial, sans-serif;
       text-align: center;
       padding: 20px;
-      margin: 0;
-      background-color: #f8f9fa;
     }
     #video {
       width: 100%;
       max-width: 400px;
       display: none;
-      margin: 20px auto;
-      border: 2px solid #ccc;
-      border-radius: 5px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin: 10px auto;
     }
     #message {
       margin-top: 10px;
       font-size: 18px;
       color: green;
     }
-    #scanButton, #forceScanButton {
-      padding: 12px 24px;
+    #scanButton {
+      padding: 10px 20px;
       font-size: 16px;
       background-color: #007bff;
       color: white;
       border: none;
       cursor: pointer;
       border-radius: 5px;
-      transition: background-color 0.3s;
     }
-    #scanButton:disabled, #forceScanButton:disabled {
+    #scanButton:disabled {
       background-color: #6c757d;
       cursor: not-allowed;
-    }
-    #scanButton:hover:enabled, #forceScanButton:hover:enabled {
-      background-color: #0056b3;
-    }
-    #debugConsole {
-      margin-top: 20px;
-      font-size: 14px;
-      background-color: #333;
-      color: #fff;
-      padding: 10px;
-      border-radius: 5px;
-      max-height: 200px;
-      overflow-y: auto;
-      text-align: left;
-    }
-    @media (max-width: 600px) {
-      #scanButton, #forceScanButton {
-        padding: 10px 18px;
-        font-size: 14px;
-      }
-      #video {
-        max-width: 100%;
-      }
     }
   </style>
 </head>
 <body>
   <h1>Barcode Scanner</h1>
   <button id="scanButton">Click to Scan Barcode</button>
-  <button id="forceScanButton" disabled>Force Scan</button>
   <video id="video" autoplay></video>
   <div id="message"></div>
 
-  <!-- Debug console section -->
-  <div id="debugConsole"></div>
-
   <script type="module">
-    // Import quaggaJS for barcode scanning
-    import Quagga from "https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js";
+    // Cache-busting query string to force the browser to reload the latest version of the script
+    const scriptVersion = 'v=1.0.1'; // You can update the version here as needed
+    
+    // Importing the qr-scanner with a version query string
+    import QrScanner from `https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?${scriptVersion}`;
 
     const video = document.getElementById("video");
     const scanButton = document.getElementById("scanButton");
-    const forceScanButton = document.getElementById("forceScanButton");
     const message = document.getElementById("message");
-    const debugConsole = document.getElementById("debugConsole");
 
-    // Function to log messages to the debug console on the webpage
-    function logToConsole(msg) {
-      const logElement = document.createElement("div");
-      logElement.textContent = msg;
-      debugConsole.appendChild(logElement);
-      debugConsole.scrollTop = debugConsole.scrollHeight;  // Auto-scroll to latest log
-    }
+    let qrScanner;
+    let barcodeScanned = false;
 
     scanButton.addEventListener("click", () => {
       // Reset previous scan state
+      barcodeScanned = false;
       message.textContent = "";
-      scanButton.style.display = "none"; // Hide scan button during scan
-      forceScanButton.disabled = false; // Enable the force scan button
 
       // Show video and start scanning
       video.style.display = "block";
+      scanButton.style.display = "none";  // Hide the button when scanning starts
+      scanButton.disabled = true;
 
-      // Log the scan button click
-      logToConsole("Button clicked - starting scan process.");
-
-      // Initialize Quagga for barcode scanning
-      Quagga.init({
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          target: video,  // Video element for live stream
-          constraints: {
-            facingMode: "environment"  // Use back camera
-          },
+      // Initialize QR Scanner
+      qrScanner = new QrScanner(
+        video,
+        (result) => {
+          if (!barcodeScanned) {
+            barcodeScanned = true; // Stop further scanning
+            qrScanner.stop(); // Stop the scanner
+            video.style.display = "none"; // Hide the video feed
+            scanButton.style.display = "inline-block"; // Show the button again
+            scanButton.disabled = false; // Re-enable the button
+            message.textContent = `Barcode Scanned: ${result}`;
+          }
         },
-        decoder: {
-          readers: ["code_128_reader", "ean_reader", "upc_reader", "code_39_reader", "ean_8_reader", "upc_e_reader"] // Add other formats if necessary
+        {
+          highlightScanRegion: true,
         }
-      }, (err) => {
-        if (err) {
-          logToConsole("Error initializing scanner: " + err);
-          return;
-        }
+      );
 
-        logToConsole("Quagga initialized successfully.");
-
-        // Start scanning
-        Quagga.start();
-        logToConsole("Quagga started.");
-      });
-
-      // Listen for barcode scans
-      Quagga.onDetected((result) => {
-        const barcode = result.codeResult.code;
-        logToConsole("Scanned barcode: " + barcode);
-        
-        // Display success message and stop scanning
-        message.textContent = `Scan Success! Barcode: ${barcode}`;
-        Quagga.stop(); // Stop scanning once a barcode is detected
-        video.style.display = "none"; // Hide the video feed
-        scanButton.style.display = "inline-block"; // Show the button again
-        forceScanButton.disabled = true; // Disable the force scan button after scan
-      });
-    });
-
-    // Force scan button
-    forceScanButton.addEventListener("click", () => {
-      // Log to console and force scan the image
-      logToConsole("Force scan button clicked.");
-
-      // Trigger the Quagga "stop" to manually take a picture of the barcode
-      Quagga.onProcessed((result) => {
-        if (result && result.codeResult) {
-          const barcode = result.codeResult.code;
-          logToConsole("Force Scanned Barcode: " + barcode);
-          message.textContent = `Force Scan Success! Barcode: ${barcode}`;
-          Quagga.stop(); // Stop scanning after force scan
-          video.style.display = "none"; // Hide video
-          forceScanButton.disabled = true; // Disable the force scan button
-        }
-      });
+      qrScanner.start();
     });
 
     // Cleanup when the page is closed
     window.addEventListener("beforeunload", () => {
-      if (Quagga) {
-        Quagga.stop();
+      if (qrScanner) {
+        qrScanner.destroy();
       }
     });
   </script>
