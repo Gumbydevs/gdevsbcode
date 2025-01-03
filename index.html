@@ -75,9 +75,22 @@
   <div id="version">Version 1.01223</div>
 
   <script>
-    // Direct import from ZXing CDN
+    // Create and load the script element for ZXing
     const script = document.createElement('script');
-    script.src = "https://cdn.jsdelivr.net/npm/@zxing/browser@0.18.5/dist/index.min.js";
+    const zxingUrl = "https://cdn.jsdelivr.net/npm/@zxing/browser@0.18.5/dist/index.min.js";
+    console.log(`Attempting to load ZXing from: ${zxingUrl}`);
+    script.src = zxingUrl;
+
+    // Handle loading failure and fallback to another CDN
+    script.onerror = () => {
+      console.error(`Failed to load ZXing from: ${zxingUrl}`);
+      const fallbackUrl = "https://unpkg.com/@zxing/browser@0.18.6/dist/index.min.js";
+      console.log(`Attempting fallback CDN from: ${fallbackUrl}`);
+      const fallbackScript = document.createElement('script');
+      fallbackScript.src = fallbackUrl;
+      document.head.appendChild(fallbackScript);
+    };
+
     document.head.appendChild(script);
 
     script.onload = () => {
@@ -188,10 +201,6 @@
         if (codeReader) codeReader.reset();
         stopContinuousAutofocus();
       });
-    };
-
-    script.onerror = () => {
-      alert('Failed to load ZXing library.');
     };
   </script>
 </body>
