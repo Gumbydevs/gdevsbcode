@@ -86,16 +86,15 @@
       margin-top: 20px;
     }
     #imagePlaceholder {
-      display: none;
-      width: 90%;
-      max-width: 400px;
-      height: 200px;
+      display: none; /* Hide placeholder initially */
+      width: 150px; /* Smaller width */
+      height: 150px; /* Smaller height */
       border: 2px dashed #007bff;
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 12px;
       color: #007bff;
       margin-bottom: 10px;
     }
@@ -161,7 +160,7 @@
     }
 
     function displayMonsterInfo(monster) {
-      imagePlaceholder.style.display = "flex";
+      imagePlaceholder.style.display = "flex"; // Show the image placeholder when a monster is generated
       monsterInfo.innerHTML = `
         <div><span class="info-item">ID:</span> <span class="info-value">${monster.id}</span></div>
         <div><span class="info-item">Name:</span> <span class="info-value">${monster.name}</span></div>
