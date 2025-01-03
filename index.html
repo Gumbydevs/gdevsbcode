@@ -26,7 +26,7 @@
       font-size: 18px;
       color: green;
     }
-    #scanButton {
+    #scanButton, #forceScanButton {
       padding: 12px 24px;
       font-size: 16px;
       background-color: #007bff;
@@ -36,11 +36,11 @@
       border-radius: 5px;
       transition: background-color 0.3s;
     }
-    #scanButton:disabled {
+    #scanButton:disabled, #forceScanButton:disabled {
       background-color: #6c757d;
       cursor: not-allowed;
     }
-    #scanButton:hover:enabled {
+    #scanButton:hover:enabled, #forceScanButton:hover:enabled {
       background-color: #0056b3;
     }
     #debugConsole {
@@ -55,7 +55,7 @@
       text-align: left;
     }
     @media (max-width: 600px) {
-      #scanButton {
+      #scanButton, #forceScanButton {
         padding: 10px 18px;
         font-size: 14px;
       }
@@ -66,8 +66,9 @@
   </style>
 </head>
 <body>
-  <h1>Monster Creation: Barcode Scanner</h1>
+  <h1>Barcode Scanner</h1>
   <button id="scanButton">Click to Scan Barcode</button>
+  <button id="forceScanButton" disabled>Force Scan</button>
   <video id="video" autoplay></video>
   <div id="message"></div>
 
@@ -80,6 +81,7 @@
 
     const video = document.getElementById("video");
     const scanButton = document.getElementById("scanButton");
+    const forceScanButton = document.getElementById("forceScanButton");
     const message = document.getElementById("message");
     const debugConsole = document.getElementById("debugConsole");
 
@@ -95,6 +97,7 @@
       // Reset previous scan state
       message.textContent = "";
       scanButton.style.display = "none"; // Hide scan button during scan
+      forceScanButton.disabled = false; // Enable the force scan button
 
       // Show video and start scanning
       video.style.display = "block";
@@ -138,6 +141,25 @@
         Quagga.stop(); // Stop scanning once a barcode is detected
         video.style.display = "none"; // Hide the video feed
         scanButton.style.display = "inline-block"; // Show the button again
+        forceScanButton.disabled = true; // Disable the force scan button after scan
+      });
+    });
+
+    // Force scan button
+    forceScanButton.addEventListener("click", () => {
+      // Log to console and force scan the image
+      logToConsole("Force scan button clicked.");
+
+      // Trigger the Quagga "stop" to manually take a picture of the barcode
+      Quagga.onProcessed((result) => {
+        if (result && result.codeResult) {
+          const barcode = result.codeResult.code;
+          logToConsole("Force Scanned Barcode: " + barcode);
+          message.textContent = `Force Scan Success! Barcode: ${barcode}`;
+          Quagga.stop(); // Stop scanning after force scan
+          video.style.display = "none"; // Hide video
+          forceScanButton.disabled = true; // Disable the force scan button
+        }
       });
     });
 
