@@ -1,1 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barcode Scanner - Version 1.017</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    #video {
+      width: 100%;
+      max-width: 400px;
+      display: none;
+      margin: 10px auto;
+    }
+    #message {
+      margin-top: 10px;
+      font-size: 18px;
+      color: green;
+    }
+    #scanButton {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    #scanButton:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+    #forceScanButton {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      display: none;
+      margin-top: 10px;
+    }
+    #forceScanButton:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+    #consoleOutput {
+      margin-top: 20px;
+      text-align: left;
+      font-size: 14px;
+      color: red;
+      background-color: #f8d7da;
+      padding: 10px;
+      border-radius: 5px;
+      white-space: pre-line;
+    }
+    #monsterInfo {
+      margin-top: 20px;
+      background-color: #e0e0e0;
+      padding: 20px;
+      border-radius: 10px;
+      display: inline-block;
+      text-align: left;
+      font-size: 16px;
+      width: 80%;
+      max-width: 400px;
+      margin: 10px auto;
+    }
+    .info-item {
+      margin: 5px 0;
+      font-weight: bold;
+    }
+    .info-value {
+      margin-left: 10px;
+      font-weight: normal;
+      color: #333;
+    }
+    #version {
+      font-size: 12px;
+      color: gray;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Barcode Scanner</h1>
+  <button id="scanButton">Click to Scan Barcode</button>
+  <button id="forceScanButton">Force Scan</button>
+  <video id="video" autoplay></video>
+  <div id="message"></div>
+  <div id="consoleOutput"></div>
+  <div id="monsterInfo"></div>
+  <div id="version">Version 1.017</div>
 
+  <script type="module">
+    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?v=1.017";
+
+    const video = document.getElementById("video");
+    const scanButton = document.getElementById("scanButton");
+    const forceScanButton = document.getElementById("forceScanButton");
+    const message = document.getElementById("message");
+    const consoleOutput = document.getElementById("consoleOutput");
+    const monsterInfo = document.getElementById("monsterInfo");
+
+    let qrScanner;
+    let barcodeScanned = false;
+    let focusInterval;
+
+    // Debug logging function to show messages on the webpage
+    function logToConsole(msg) {
+      const logMessage = document.createElement('div');
+      logMessage.textContent = msg;
+      consoleOutput.appendChild(logMessage);
+      console.log(msg);
+    }
+
+    // Continuous autofocus adjustment
+    function startContinuousAutofocus() {
+      if (focusInterval) clearInterval(focusInterval);
+      focusInterval = setInterval(() => {
+        const track = video.srcObject?.getVideoTracks()[0];
+        if (track) {
+          track.applyConstraints({ advanced: [{ focusMode: "continuous" }] });
+        }
+      }, 2000);
+    }
+
+    function stopContinuousAutofocus() {
+      if (focusInterval) clearInterval(focusInterval);
+    }
+
+    // Generate a random monster name
+    function generateRandomName() {
+      const names = ["Gorgoth", "Slithor", "Zarvok", "Magrath", "Korrak", "Zypheron"];
+      return names[Math.floor(Math.random() * names.length)];
+    }
+
+    // Generate random stats for the monster
+    function generateMonsterStats() {
+      return {
+        HP: Math.floor(Math.random() * 100) + 50, // Random HP between 50 and 150
+        AP: Math.floor(Math.random() * 20) + 10,  // Random AP between 10 and 30
+        Speed: Math.floor(Math.random() * 10) + 5 // Random Speed between 5 and 15
+      };
+    }
+
+    // Generate unique monster ID based on barcode data
+    function generateMonsterId(barcodeData) {
+      let id = 0;
+      for (let i = 0; i < barcodeData.length; i++) {
+        id += barcodeData.charCodeAt(i);
+      }
+      return "MONSTER-" + id; // Simple but unique ID based on barcode content
+    }
+
+    // Start scanning
+    scanButton.addEventListener("click", async () => {
+      logToConsole("Button clicked - starting scan...");
+      barcodeScanned = false;
+      message.textContent = "";
+
+      video.style.display = "block";
+      scanButton.style.display = "none";
+      forceScanButton.style.display = "inline-block";
+
+      try {
+        qrScanner = new QrScanner(
+          video,
+          (result) => {
+            if (!barcodeScanned) {
+              barcodeScanned = true;
+              const resultData = result?.data || "Unknown format";
+              const monsterId = generateMonsterId(resultData); // Unique ID based on barcode
+              const monsterName = generateRandomName();
+              const stats = generateMonsterStats();
+
+              // Update the message with nicely formatted monster info
+              message.textContent = `Scan Successful: ${resultData}`;
+              monsterInfo.innerHTML = `
+                <div class="info-item">Monster ID:</div><div class="info-value">${monsterId}</div>
+                <div class="info-item">Name:</div><div class="info-value">${monsterName}</div>
+                <div class="info-item">HP:</div><div class="info-value">${stats.HP}</div>
+                <div class="info-item">AP:</div><div class="info-value">${stats.AP}</div>
+                <div class="info-item">Speed:</div><div class="info-value">${stats.Speed}</div>
+              `;
+
+              logToConsole(`Scan Successful: ${resultData}\nMonster ID: ${monsterId}\nName: ${monsterName}\nHP: ${stats.HP}\nAP: ${stats.AP}\nSpeed: ${stats.Speed}`);
+              qrScanner.stop();
+              stopContinuousAutofocus();
+              video.style.display = "none";
+              scanButton.style.display = "inline-block";
+              forceScanButton.style.display = "none";
+            }
+          },
+          {
+            highlightScanRegion: true,
+            preferredScanTypes: ["qr-code", "ean_13", "ean_8", "upc_a", "upc_e", "code_128"],
+          }
+        );
+
+        await qrScanner.start();
+        startContinuousAutofocus();
+        logToConsole("QR Scanner started...");
+      } catch (error) {
+        logToConsole(`Error: ${error.message}`);
+      }
+    });
+
+    // Force Scan Button click event
+    forceScanButton.addEventListener("click", async () => {
+      logToConsole("Force Scan button clicked...");
+      if (qrScanner) {
+        const result = await qrScanner.scanImage();
+        const resultData = result?.data || "No barcode detected";
+        message.textContent = `Force Scan Result: ${resultData}`;
+        logToConsole(`Force Scan Result: ${resultData}`);
+      }
+    });
+
+    // Cleanup when page is closed
+    window.addEventListener("beforeunload", () => {
+      if (qrScanner) qrScanner.destroy();
+      stopContinuousAutofocus();
+    });
+  </script>
+</body>
+</html>
