@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Scanner - Version 1.017</title>
+  <title>Barcode Scanner - Version 1.0121</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -75,7 +75,7 @@
   <div id="version">Version 1.017</div>
 
   <script type="module">
-    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?v=1.017";
+    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?v=1.0121";
 
     const video = document.getElementById("video");
     const scanButton = document.getElementById("scanButton");
@@ -110,6 +110,21 @@
       if (focusInterval) clearInterval(focusInterval);
     }
 
+    // Generate a random monster name
+    function generateRandomName() {
+      const names = ["Gorgoth", "Slithor", "Zarvok", "Magrath", "Korrak", "Zypheron"];
+      return names[Math.floor(Math.random() * names.length)];
+    }
+
+    // Generate random stats for the monster
+    function generateMonsterStats() {
+      return {
+        HP: Math.floor(Math.random() * 100) + 50, // Random HP between 50 and 150
+        AP: Math.floor(Math.random() * 20) + 10,  // Random AP between 10 and 30
+        Speed: Math.floor(Math.random() * 10) + 5 // Random Speed between 5 and 15
+      };
+    }
+
     // Start scanning
     scanButton.addEventListener("click", async () => {
       logToConsole("Button clicked - starting scan...");
@@ -127,8 +142,12 @@
             if (!barcodeScanned) {
               barcodeScanned = true;
               const resultData = result?.data || "Unknown format";
-              message.textContent = `Scan Successful: ${resultData}`;
-              logToConsole(`Scan Successful: ${resultData}`);
+              const monsterId = "MONSTER-" + Math.floor(Math.random() * 100000); // Unique ID for the monster
+              const monsterName = generateRandomName();
+              const stats = generateMonsterStats();
+
+              message.textContent = `Scan Successful: ${resultData}\nMonster ID: ${monsterId}\nName: ${monsterName}\nHP: ${stats.HP}\nAP: ${stats.AP}\nSpeed: ${stats.Speed}`;
+              logToConsole(`Scan Successful: ${resultData}\nMonster ID: ${monsterId}\nName: ${monsterName}\nHP: ${stats.HP}\nAP: ${stats.AP}\nSpeed: ${stats.Speed}`);
               qrScanner.stop();
               stopContinuousAutofocus();
               video.style.display = "none";
