@@ -69,6 +69,18 @@
     .info-item {
       font-weight: bold;
     }
+    #aiPlaceholder {
+      width: 300px;
+      height: 300px;
+      background-color: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px 0;
+      border: 2px dashed #888;
+      font-size: 14px;
+      color: #555;
+    }
     #consoleOutput {
       font-size: 14px;
       margin-top: 20px;
@@ -94,6 +106,7 @@
   <video id="video" autoplay></video>
   <div id="message"></div>
   <div id="monsterInfo"></div>
+  <div id="aiPlaceholder">AI Generated Appearance Placeholder</div>
   <div class="buttons">
     <button onclick="window.location.href='fighter-collection.html'">Fighter Collection</button>
     <button onclick="window.location.href='monster-training.html'">Monster Training</button>
