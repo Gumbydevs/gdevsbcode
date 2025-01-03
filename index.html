@@ -1,60 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode to Monster Generator</title>
-    <script src="https://cdn.jsdelivr.net/npm/quagga@0.12.1/dist/quagga.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barcode Scanner</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    #video {
+      width: 100%;
+      max-width: 400px;
+      display: none;
+      margin: 10px auto;
+    }
+    #message {
+      margin-top: 10px;
+      font-size: 18px;
+      color: green;
+    }
+    #scanButton {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    #scanButton:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
 <body>
-    <h1>Scan a Barcode to Generate your unique Monster!</h1>
-    <video id="scanner" width="100%" height="auto"></video>
-    <div id="result"></div>
-    
-    <script>
-        // Start scanning with QuaggaJS
-        Quagga.init({
-            inputStream: {
-                name: "Live",
-                type: "LiveStream",
-                target: document.querySelector('#scanner'),
-                constraints: {
-                    facingMode: "environment" // Use rear camera for barcode scanning
-                }
-            },
-            decoder: {
-                readers: ["code_128_reader", "ean_reader", "ean_8_reader", "code_39_reader"]
-            }
-        }, function(err) {
-            if (err) {
-                console.log(err);
-                return;
-            }
-            Quagga.start();
-        });
+  <h1>Barcode Scanner</h1>
+  <button id="scanButton">Click to Scan Barcode</button>
+  <video id="video" autoplay></video>
+  <div id="message"></div>
 
-        // Listen for successful barcode reading
-        Quagga.onDetected(function(result) {
-            const barcode = result.codeResult.code;
-            console.log('Barcode scanned: ' + barcode);
-            document.getElementById('result').innerHTML = `Barcode scanned successfully: ${barcode}`;
-            // Call the monster generation function here
-            generateMonster(barcode);
-        });
+  <script type="module">
+    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js";
 
-        // Function to generate monster (call to AI API)
-        function generateMonster(barcode) {
-            // Placeholder: In the full version, you would send this barcode to an AI backend
-            const monsterSeed = barcode; // Simple example, seed is just the barcode itself
+    const video = document.getElementById("video");
+    const scanButton = document.getElementById("scanButton");
+    const message = document.getElementById("message");
 
-            // Call AI image generator (this is a placeholder for now)
-            const monsterImageUrl = `https://dummyimage.com/400x400/000/fff&text=Monster+Seed+${monsterSeed}`;
+    let qrScanner;
+    let barcodeScanned = false;
 
-            // Display the generated monster
-            const img = document.createElement('img');
-            img.src = monsterImageUrl;
-            document.body.appendChild(img);
+    scanButton.addEventListener("click", () => {
+      // Reset previous scan state
+      barcodeScanned = false;
+      message.textContent = "";
+
+      // Show video and start scanning
+      video.style.display = "block";
+      scanButton.disabled = true;
+
+      // Initialize QR Scanner
+      qrScanner = new QrScanner(
+        video,
+        (result) => {
+          if (!barcodeScanned) {
+            barcodeScanned = true; // Stop further scanning
+            qrScanner.stop(); // Stop the scanner
+            video.style.display = "none"; // Hide the video feed
+            scanButton.disabled = false; // Re-enable the button
+            message.textContent = `Barcode Scanned: ${result}`;
+          }
+        },
+        {
+          highlightScanRegion: true,
         }
-    </script>
+      );
+
+      qrScanner.start();
+    });
+
+    // Cleanup when the page is closed
+    window.addEventListener("beforeunload", () => {
+      if (qrScanner) {
+        qrScanner.destroy();
+      }
+    });
+  </script>
 </body>
 </html>
