@@ -6,106 +6,7 @@
     <title>Monster Collection</title>
     <link rel="stylesheet" href="styles.css"> <!-- Include your common stylesheet -->
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            background-color: #333;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 2rem;
-        }
-
-        #playerInfo {
-            font-size: 1rem;
-            margin-top: 10px;
-        }
-
-        #playerInfo span {
-            font-weight: bold;
-        }
-
-        main {
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        #monsterCollection {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-            width: 100%;
-            max-width: 1000px;
-        }
-
-        .monster-card {
-            background-color: #fff;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            transition: transform 0.2s ease-in-out;
-        }
-
-        .monster-card:hover {
-            transform: scale(1.05);
-        }
-
-        .monster-card h3 {
-            font-size: 1.5rem;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .info-item {
-            font-weight: bold;
-            margin-top: 5px;
-            color: #555;
-        }
-
-        .info-value {
-            font-weight: normal;
-            color: #777;
-        }
-
-        .placeholder {
-            width: 150px;
-            height: 150px;
-            background-color: #ddd;
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #555;
-            font-size: 0.9rem;
-            font-style: italic;
-            margin-top: 10px;
-        }
-
-        footer {
-            background-color: #333;
-            color: white;
-            padding: 10px;
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        footer p {
-            margin: 0;
-            font-size: 0.9rem;
-        }
+        /* Include your previous CSS styles here */
     </style>
 </head>
 <body>
@@ -130,28 +31,33 @@
     <script>
         const playerID = "1001";  // Replace with dynamic player ID if necessary
 
-        // Load player data from GitHub Pages
-        fetch('https://gumbydevs.github.io/gdevsbcode/database.json')
-          .then(response => response.json())
-          .then(data => {
-            const playerData = data[playerID]; // Get the player's data by ID
+        // Get player data from localStorage
+        const playerData = JSON.parse(localStorage.getItem("playerData"));
 
-            if (playerData) {
-                document.getElementById("playerName").textContent = playerData.playerName;
+        if (playerData) {
+            // If player data exists, populate the page with their info
+            const currentPlayerData = playerData[playerID];
+            if (currentPlayerData) {
+                document.getElementById("playerName").textContent = currentPlayerData.playerName;
                 document.getElementById("playerID").textContent = playerID;
 
                 const monsterCollectionDiv = document.getElementById("monsterCollection");
-                if (playerData.monsters && playerData.monsters.length > 0) {
+                if (currentPlayerData.monsters && currentPlayerData.monsters.length > 0) {
                     // Clear the loading message
                     monsterCollectionDiv.innerHTML = '';
 
-                    playerData.monsters.forEach(monster => {
+                    currentPlayerData.monsters.forEach(monster => {
                         const monsterCard = document.createElement("div");
                         monsterCard.classList.add("monster-card");
 
+                        // If the monster has an image URL, use it, else show a placeholder
+                        const monsterImage = monster.imageUrl ? 
+                            `<img src="${monster.imageUrl}" alt="${monster.name}" style="width: 100%; height: auto; border-radius: 10px;">` : 
+                            '<div class="placeholder">No Image</div>';
+
                         monsterCard.innerHTML = `
                             <h3>${monster.name}</h3>
-                            <div class="placeholder">Monster AI generated appearance placeholder</div>
+                            ${monsterImage}
                             <div class="info-item">Monster ID:</div><div class="info-value">${monster.id}</div>
                             <div class="info-item">Level:</div><div class="info-value">${monster.level}</div>
                             <div class="info-item">HP:</div><div class="info-value">${monster.stats.HP}</div>
@@ -167,11 +73,9 @@
             } else {
                 document.getElementById("monsterCollection").innerHTML = "<p>No player data found.</p>";
             }
-          })
-          .catch(error => {
-            console.error("Error loading player data:", error);
-            document.getElementById("monsterCollection").innerHTML = "<p>Error loading data.</p>";
-          });
+        } else {
+            document.getElementById("monsterCollection").innerHTML = "<p>No player data found in localStorage.</p>";
+        }
     </script>
 </body>
 </html>
