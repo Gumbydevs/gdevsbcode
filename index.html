@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Scanner - Version 1.01228</title>
+  <title>Barcode Scanner - Version 1.01226</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -57,7 +57,7 @@
   <video id="video" autoplay></video>
   <div id="message"></div>
   <div id="consoleOutput"></div>
-  <div id="version">Version 1.01228</div>
+  <div id="version">Version 1.01226</div>
 
   <script>
     // Direct import from ZXing CDN
@@ -108,8 +108,17 @@
           const stream = await navigator.mediaDevices.getUserMedia({
             video: { deviceId: { exact: selectedDeviceId } },
           });
-          video.srcObject = stream; // Attach the stream to the video element
-          logToConsole("Video stream attached to video element.");
+
+          // If the stream is accessible, attach it to the video element
+          if (stream) {
+            video.srcObject = stream; // Attach the stream to the video element
+            video.style.display = "block"; // Ensure the video element is visible
+            logToConsole("Video stream attached to video element.");
+          } else {
+            logToConsole("Failed to access camera.");
+            message.textContent = "Error: Unable to access camera.";
+            return;
+          }
 
           // Start decoding from the video input
           await codeReader.decodeFromVideoDevice(selectedDeviceId, video, (result, error) => {
