@@ -126,6 +126,10 @@
       forceScanButton.style.display = "inline-block";
 
       try {
+        // Request camera permissions
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+
         // Initialize Barcode reader
         codeReader = new BrowserMultiFormatReader();
         logToConsole("Barcode reader initialized...");
