@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Masters - Landing Page - Version 1.018</title>
+  <title>Barcode Masters - Login Page - Version 1.018</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -30,24 +30,6 @@
       width: 275px;
       height: 264px;
     }
-    .player-info {
-      font-size: 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: flex-start;
-      margin-left: 20px;
-    }
-    .player-info p {
-      margin: 5px 0;
-    }
-    .player-avatar {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background-color: #d0d0d0;
-      margin-bottom: 10px;
-    }
     .button {
       padding: 12px 25px;
       font-size: 16px;
@@ -66,41 +48,9 @@
       color: gray;
       margin-top: 20px;
     }
-    .game-explanation {
-      font-size: 16px;
-      margin-bottom: 20px;
-      color: #333;
-    }
-
-    /* Mobile adjustments */
-    @media (max-width: 768px) {
-      .main-header {
-        flex-direction: column;
-        align-items: center;
-      }
-      header img {
-        width: 150px; /* Further shrink the logo for mobile */
-        height: auto;
-        margin-bottom: 20px;
-      }
-      .player-info {
-        align-items: center;
-        margin-left: 0;
-      }
-      .player-avatar {
-        width: 50px;
-        height: 50px;
-        margin-bottom: 10px;
-      }
-      .button {
-        padding: 10px 20px;
-        font-size: 14px;
-      }
-      #version {
-        font-size: 10px;
-      }
-    }
   </style>
+  <!-- Google OAuth Script -->
+  <script src="https://apis.google.com/js/api.js" async defer></script>
 </head>
 <body>
   <div class="main-header">
@@ -108,45 +58,45 @@
     <header>
       <img src="BarcodeLogo1.PNG" alt="Barcode Masters Logo">
     </header>
-
-    <!-- Player Info on the right -->
-    <div class="player-info">
-      <div class="player-avatar"></div> <!-- Placeholder for Player Avatar -->
-      <p><strong>Player Name:</strong> <span id="playerName">Player One</span></p>
-      <p><strong>Player ID:</strong> <span id="playerID">1234567890</span></p>
-      <p><strong>Wins:</strong> <span id="playerWins">0</span></p>
-      <p><strong>Losses:</strong> <span id="playerLosses">0</span></p>
-      <p><strong>Monsters Collected:</strong> <span id="playerMonsters">0</span></p>
-    </div>
   </div>
 
-  <div class="game-explanation">
-    <p>Scan barcodes, unlock unique creatures, and battle them in thrilling PVP fights! Collect, train, and evolve your creatures as you rise to become the ultimate Barcode Master.</p>
-  </div>
-
-  <div>
-    <button class="button" onclick="window.location.href='monster-generator.html'">DNA Extractor</button>
-    <button class="button" onclick="window.location.href='monster-collection.html'">Monster Collection</button>
-    <button class="button" onclick="window.location.href='monster-training.html'">Monster Training</button>
-    <button class="button" onclick="window.location.href='pvp-battle.html'">PVP Battle</button>
+  <h2>Login to Barcode Masters</h2>
+  <p>Sign in with your Google account to begin your adventure!</p>
   
-    <!-- Added Help Button -->
-    <button class="button" onclick="window.location.href='help.html'">Help</button>
-  </div>
-
+  <!-- Google Sign-In button -->
+  <button class="button" id="googleSignInBtn">Sign in with Google</button>
+  
   <div id="version">Prototype Version 1.018</div>
   <div style="font-size: 12px; color: gray; margin-top: 20px;">&copy; 2025 Barcode Masters. All rights reserved.</div>
 
   <script>
-    // Checking if the script runs correctly
-    console.log("Page Loaded");
-
-    // Dynamically set the player name and ID from game logic or local storage
-    document.getElementById('playerName').textContent = "Gumby";  // Example name
-    document.getElementById('playerID').textContent = "1001";  // Example ID
-    document.getElementById('playerWins').textContent = "5";  // Example wins
-    document.getElementById('playerLosses').textContent = "2";  // Example losses
-    document.getElementById('playerMonsters').textContent = "10";  // Example monsters collected
+    // Handle Google Login
+    function handleClientLoad() {
+      gapi.load('auth2', function() {
+        gapi.auth2.init({
+          client_id: '165878256929-9duhr0ip79qltaaa7inoedheqtbdnr20.apps.googleusercontent.com',
+        }).then(function() {
+          // Setup Google sign-in button
+          document.getElementById('googleSignInBtn').addEventListener('click', function() {
+            gapi.auth2.getAuthInstance().signIn().then(function(googleUser) {
+              const profile = googleUser.getBasicProfile();
+              const userId = profile.getId();
+              const userName = profile.getName();
+              const userEmail = profile.getEmail();
+              // Store user data locally (or on a server)
+              localStorage.setItem('userId', userId);
+              localStorage.setItem('userName', userName);
+              localStorage.setItem('userEmail', userEmail);
+              // Redirect to home page
+              window.location.href = 'home.html';
+            });
+          });
+        });
+      });
+    }
+    
+    // Load Google API Client
+    handleClientLoad();
   </script>
 </body>
 </html>
