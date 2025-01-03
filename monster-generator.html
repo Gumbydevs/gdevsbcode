@@ -112,6 +112,10 @@
 <body>
   <h1>Barcode DNA Extractor</h1>
   <button id="scanButton">Click to Scan Barcode</button>
+   <!-- Disclaimer text about QR codes -->
+  <div id="disclaimer">
+    <p>* Please note: The scanner currently only supports QR codes as barcode functionality is temporarily broken.</p>
+  </div>
   <button id="forceScanButton" style="display:none;">Force Scan</button>
   <video id="video" autoplay></video>
   <div id="message"></div>
@@ -127,11 +131,8 @@
   <div id="consoleOutput"></div>
   <div id="version">Version 0.031</div>
   <div style="font-size: 12px; color: gray; margin-top: 20px;">&copy; 2025 Barcode Masters. All rights reserved.</div>
-  
-  <!-- Disclaimer text about QR codes -->
-  <div id="disclaimer">
-    <p>* Please note: The scanner currently only supports QR codes as barcode functionality is temporarily broken.</p>
-  </div>
+ 
+ 
 
   <script type="module">
     import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?v=1.018";
