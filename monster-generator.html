@@ -197,7 +197,7 @@
             if (!barcodeScanned) {
               barcodeScanned = true;
               const monster = generateMonster(result.data);
-              message.innerHTML = `<strong>${monster.name}</strong> - Scan Successful: ${result.data}`;
+              message.innerHTML = `<strong>${monster.name}</strong> - Scan Successful!`;
               qrScanner.stop();
               video.style.display = "none";
               scanButton.style.display = "block";
