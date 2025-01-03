@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Scanner - Version 1.016</title>
+  <title>Barcode Scanner - Version 1.017</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -72,11 +72,11 @@
   <video id="video" autoplay></video>
   <div id="message"></div>
   <div id="consoleOutput"></div>
-  <div id="version">Version 1.016</div>
+  <div id="version">Version 1.017</div>
 
   <script type="module">
-    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?v=1.016"; // Cache bust versioning
-    
+    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?v=1.017";
+
     const video = document.getElementById("video");
     const scanButton = document.getElementById("scanButton");
     const forceScanButton = document.getElementById("forceScanButton");
@@ -88,76 +88,60 @@
     let focusInterval;
 
     // Debug logging function to show messages on the webpage
-    function logToConsole(message) {
+    function logToConsole(msg) {
       const logMessage = document.createElement('div');
-      logMessage.textContent = message;
+      logMessage.textContent = msg;
       consoleOutput.appendChild(logMessage);
-      console.log(message);
+      console.log(msg);
     }
 
     // Continuous autofocus adjustment
     function startContinuousAutofocus() {
-      if (focusInterval) clearInterval(focusInterval); // Clear any existing interval
+      if (focusInterval) clearInterval(focusInterval);
       focusInterval = setInterval(() => {
         const track = video.srcObject?.getVideoTracks()[0];
         if (track) {
-          const capabilities = track.getCapabilities();
-          if (capabilities.focusDistance) {
-            track.applyConstraints({
-              advanced: [{ focusMode: "continuous" }] // Use continuous focus
-            }).then(() => logToConsole("Camera focus adjusted."));
-          }
+          track.applyConstraints({ advanced: [{ focusMode: "continuous" }] });
         }
-      }, 2000); // Adjust focus every 2 seconds
+      }, 2000);
     }
 
-    // Stop autofocus when scanning ends
     function stopContinuousAutofocus() {
-      if (focusInterval) {
-        clearInterval(focusInterval);
-        focusInterval = null;
-      }
+      if (focusInterval) clearInterval(focusInterval);
     }
 
-    // Scan Button click event
+    // Start scanning
     scanButton.addEventListener("click", async () => {
       logToConsole("Button clicked - starting scan...");
-      barcodeScanned = false; // Reset previous scan state
+      barcodeScanned = false;
       message.textContent = "";
 
-      // Show video feed, hide scan button, and show force scan button
       video.style.display = "block";
-      scanButton.style.display = "none"; // Hide the scan button
-      forceScanButton.style.display = "inline-block"; // Show force scan button
+      scanButton.style.display = "none";
+      forceScanButton.style.display = "inline-block";
 
       try {
-        // Initialize QR Scanner
         qrScanner = new QrScanner(
           video,
           (result) => {
-            logToConsole(`Scan result object: ${JSON.stringify(result)}`);
             if (!barcodeScanned) {
               barcodeScanned = true;
-              qrScanner.stop(); // Stop scanning after first successful scan
-              stopContinuousAutofocus(); // Stop adjusting focus
-              video.style.display = "none"; // Hide video feed
-              scanButton.style.display = "inline-block"; // Re-enable the scan button
-              forceScanButton.style.display = "none"; // Hide force scan button
-
-              // Display and log result data
               const resultData = result?.data || "Unknown format";
               message.textContent = `Scan Successful: ${resultData}`;
               logToConsole(`Scan Successful: ${resultData}`);
+              qrScanner.stop();
+              stopContinuousAutofocus();
+              video.style.display = "none";
+              scanButton.style.display = "inline-block";
+              forceScanButton.style.display = "none";
             }
           },
           {
             highlightScanRegion: true,
-            preferredScanTypes: ['qr-code', 'ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128'], // Support QR and barcodes
-            maxScansPerSecond: 5,
+            preferredScanTypes: ["qr-code", "ean_13", "ean_8", "upc_a", "upc_e", "code_128"],
           }
         );
 
-        // Start the scanner and autofocus
         await qrScanner.start();
         startContinuousAutofocus();
         logToConsole("QR Scanner started...");
@@ -170,24 +154,17 @@
     forceScanButton.addEventListener("click", async () => {
       logToConsole("Force Scan button clicked...");
       if (qrScanner) {
-        const result = await qrScanner.scan();
-        if (result) {
-          const resultData = result?.data || "Unknown format";
-          message.textContent = `Forced Scan Successful: ${resultData}`;
-          logToConsole(`Forced Scan Successful: ${resultData}`);
-        } else {
-          message.textContent = "No barcode detected.";
-          logToConsole("Forced Scan: No barcode detected.");
-        }
+        const result = await qrScanner.scanImage();
+        const resultData = result?.data || "No barcode detected";
+        message.textContent = `Force Scan Result: ${resultData}`;
+        logToConsole(`Force Scan Result: ${resultData}`);
       }
     });
 
-    // Cleanup when the page is closed
+    // Cleanup when page is closed
     window.addEventListener("beforeunload", () => {
-      if (qrScanner) {
-        qrScanner.destroy();
-      }
-      stopContinuousAutofocus(); // Stop autofocus on unload
+      if (qrScanner) qrScanner.destroy();
+      stopContinuousAutofocus();
     });
   </script>
 </body>
