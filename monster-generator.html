@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode DNA Extractor - Version 0.028</title>
+  <title>Barcode DNA Extractor - Version 0.029</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -85,18 +85,18 @@
       color: #666;
       margin-top: 20px;
     }
-    /* Updated styles for the smaller, hidden placeholder */
+    /* Updated styles for the adjusted placeholder size */
     #imagePlaceholder {
-      display: none; /* Hidden by default */
-      width: 30%; /* Smaller size */
-      max-width: 120px; /* Limit the maximum width */
-      height: 80px; /* Smaller height */
+      visibility: hidden; /* Hidden by default, not taking space */
+      width: 50%; /* Slightly larger than before */
+      max-width: 160px; /* Limit the maximum width */
+      height: 100px; /* Slightly larger height */
       border: 2px dashed #007bff;
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px; /* Smaller font size */
+      font-size: 14px; /* Adjusted font size */
       color: #007bff;
       margin-bottom: 10px;
     }
@@ -118,7 +118,7 @@
     <button onclick="window.location.href='index.html'">Main Page</button>
   </div>
   <div id="consoleOutput"></div>
-  <div id="version">Version 0.028</div>
+  <div id="version">Version 0.029</div>
   <div style="font-size: 12px; color: gray; margin-top: 20px;">&copy; 2025 Barcode Masters. All rights reserved.</div>
   <script type="module">
     import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?v=1.018";
@@ -162,7 +162,7 @@
     }
 
     function displayMonsterInfo(monster) {
-      imagePlaceholder.style.display = "flex"; // Show placeholder after scan
+      imagePlaceholder.style.visibility = "visible"; // Make placeholder visible after scan
       monsterInfo.innerHTML = `
         <div><span class="info-item">ID:</span> <span class="info-value">${monster.id}</span></div>
         <div><span class="info-item">Name:</span> <span class="info-value">${monster.name}</span></div>
