@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Scanner - Version 1.01224</title>
+  <title>Barcode Scanner - Version 1.01225</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -72,7 +72,7 @@
   <video id="video" autoplay></video>
   <div id="message"></div>
   <div id="consoleOutput"></div>
-  <div id="version">Version 1.01224</div>
+  <div id="version">Version 1.01225</div>
 
   <script>
     // Direct import from ZXing CDN (restoring to previous working version)
@@ -81,6 +81,8 @@
     document.head.appendChild(script);
 
     script.onload = () => {
+      console.log("ZXing library loaded successfully."); // Check if the library loaded
+      
       const video = document.getElementById("video");
       const scanButton = document.getElementById("scanButton");
       const forceScanButton = document.getElementById("forceScanButton");
@@ -121,6 +123,7 @@
 
       // Start scanning
       scanButton.addEventListener("click", async () => {
+        console.log("Scan button clicked."); // Log when the button is clicked
         logToConsole("Button clicked - starting scan...");
         barcodeScanned = false;
         message.textContent = "";
