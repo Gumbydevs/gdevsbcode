@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Scanner</title>
+  <title>Barcode & QR Code Scanner</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -21,7 +21,7 @@
       font-size: 18px;
       color: green;
     }
-    #scanButton {
+    #scanButton, #forceScanButton {
       padding: 10px 20px;
       font-size: 16px;
       background-color: #007bff;
@@ -29,75 +29,92 @@
       border: none;
       cursor: pointer;
       border-radius: 5px;
+      margin-top: 10px;
     }
-    #scanButton:disabled {
+    #scanButton:disabled, #forceScanButton:disabled {
       background-color: #6c757d;
       cursor: not-allowed;
+    }
+    #forceScanButton {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <h1>Barcode Scanner</h1>
-  <button id="scanButton">Click to Scan Barcode</button>
+  <h1>Barcode & QR Code Scanner</h1>
+  <button id="scanButton">Click to Scan Barcode or QR Code</button>
+  <button id="forceScanButton">Force Scan</button>
   <video id="video" autoplay></video>
   <div id="message"></div>
 
+  <script src="https://unpkg.com/@zxing/library@0.18.6/dist/index.min.js"></script>
+
   <script>
-    // Cache-busting version query
-    const scriptVersion = 'v=1.0.1'; // Update version as needed
-    
-    // Dynamically load the script with cache busting
-    const script = document.createElement('script');
-    script.type = 'module';
-    script.src = `https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?${scriptVersion}`;
-    document.head.appendChild(script);
+    const video = document.getElementById("video");
+    const scanButton = document.getElementById("scanButton");
+    const forceScanButton = document.getElementById("forceScanButton");
+    const message = document.getElementById("message");
 
-    script.onload = () => {
-      const video = document.getElementById("video");
-      const scanButton = document.getElementById("scanButton");
-      const message = document.getElementById("message");
+    let barcodeScanned = false;
+    let selectedDeviceId;
 
-      let qrScanner;
-      let barcodeScanned = false;
+    const codeReader = new ZXing.BrowserBarcodeReader();
 
-      scanButton.addEventListener("click", () => {
-        // Reset previous scan state
-        barcodeScanned = false;
-        message.textContent = "";
+    // Start scanning when the button is clicked
+    scanButton.addEventListener("click", () => {
+      // Reset previous scan state
+      barcodeScanned = false;
+      message.textContent = "";
 
-        // Show video and start scanning
-        video.style.display = "block";
-        scanButton.style.display = "none"; // Hide the button when scanning starts
-        scanButton.disabled = true;
+      // Show video and start scanning
+      video.style.display = "block";
+      scanButton.style.display = "none"; // Hide the button
+      forceScanButton.style.display = "inline-block"; // Show force scan button
+      scanButton.disabled = true;
 
-        // Initialize QR Scanner
-        qrScanner = new QrScanner(
-          video,
-          (result) => {
-            if (!barcodeScanned) {
-              barcodeScanned = true; // Stop further scanning
-              qrScanner.stop(); // Stop the scanner
-              video.style.display = "none"; // Hide the video feed
-              scanButton.style.display = "inline-block"; // Show the button again
-              scanButton.disabled = false; // Re-enable the button
-              message.textContent = `Barcode Scanned: ${result}`;
-            }
-          },
-          {
-            highlightScanRegion: true,
+      // Get the available video devices (cameras)
+      ZXing.BrowserCodeReader.listVideoDevices().then((videoInputDevices) => {
+        selectedDeviceId = videoInputDevices[0].deviceId; // Choose the first camera
+        startScanning();
+      });
+    });
+
+    // Start scanning function
+    function startScanning() {
+      codeReader
+        .decodeFromVideoDevice(selectedDeviceId, video, (result, error) => {
+          if (result && !barcodeScanned) {
+            barcodeScanned = true; // Stop further scanning
+            codeReader.reset(); // Stop the scanner
+            video.style.display = "none"; // Hide the video feed
+            scanButton.style.display = "inline-block"; // Show the button again
+            forceScanButton.style.display = "none"; // Hide the force scan button
+            scanButton.disabled = false; // Re-enable the button
+            message.textContent = `Scan Success: ${result.text} (Type: ${result.format})`;
           }
-        );
 
-        qrScanner.start();
-      });
+          if (error && !barcodeScanned) {
+            message.textContent = "Scanning error or no barcode/QR code detected!";
+          }
+        })
+        .catch((err) => {
+          message.textContent = "Error accessing the camera.";
+        });
+    }
 
-      // Cleanup when the page is closed
-      window.addEventListener("beforeunload", () => {
-        if (qrScanner) {
-          qrScanner.destroy();
-        }
-      });
-    };
+    // Force scan button to manually capture image and stop scanning
+    forceScanButton.addEventListener("click", () => {
+      codeReader.reset(); // Manually stop scanning
+      message.textContent = "Scan process was manually stopped.";
+      video.style.display = "none"; // Hide the video feed
+      scanButton.style.display = "inline-block"; // Show the button again
+      forceScanButton.style.display = "none"; // Hide the force scan button
+    });
+
+    // Cleanup when the page is closed
+    window.addEventListener("beforeunload", () => {
+      codeReader.reset();
+    });
   </script>
 </body>
 </html>
