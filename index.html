@@ -42,57 +42,62 @@
   <video id="video" autoplay></video>
   <div id="message"></div>
 
-  <script type="module">
-    // Cache-busting query string to force the browser to reload the latest version of the script
-    const scriptVersion = 'v=1.0.1'; // You can update the version here as needed
+  <script>
+    // Cache-busting version query
+    const scriptVersion = 'v=1.0.1'; // Update version as needed
     
-    // Importing the qr-scanner with a version query string
-    import QrScanner from `https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?${scriptVersion}`;
+    // Dynamically load the script with cache busting
+    const script = document.createElement('script');
+    script.type = 'module';
+    script.src = `https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?${scriptVersion}`;
+    document.head.appendChild(script);
 
-    const video = document.getElementById("video");
-    const scanButton = document.getElementById("scanButton");
-    const message = document.getElementById("message");
+    script.onload = () => {
+      const video = document.getElementById("video");
+      const scanButton = document.getElementById("scanButton");
+      const message = document.getElementById("message");
 
-    let qrScanner;
-    let barcodeScanned = false;
+      let qrScanner;
+      let barcodeScanned = false;
 
-    scanButton.addEventListener("click", () => {
-      // Reset previous scan state
-      barcodeScanned = false;
-      message.textContent = "";
+      scanButton.addEventListener("click", () => {
+        // Reset previous scan state
+        barcodeScanned = false;
+        message.textContent = "";
 
-      // Show video and start scanning
-      video.style.display = "block";
-      scanButton.style.display = "none";  // Hide the button when scanning starts
-      scanButton.disabled = true;
+        // Show video and start scanning
+        video.style.display = "block";
+        scanButton.style.display = "none"; // Hide the button when scanning starts
+        scanButton.disabled = true;
 
-      // Initialize QR Scanner
-      qrScanner = new QrScanner(
-        video,
-        (result) => {
-          if (!barcodeScanned) {
-            barcodeScanned = true; // Stop further scanning
-            qrScanner.stop(); // Stop the scanner
-            video.style.display = "none"; // Hide the video feed
-            scanButton.style.display = "inline-block"; // Show the button again
-            scanButton.disabled = false; // Re-enable the button
-            message.textContent = `Barcode Scanned: ${result}`;
+        // Initialize QR Scanner
+        qrScanner = new QrScanner(
+          video,
+          (result) => {
+            if (!barcodeScanned) {
+              barcodeScanned = true; // Stop further scanning
+              qrScanner.stop(); // Stop the scanner
+              video.style.display = "none"; // Hide the video feed
+              scanButton.style.display = "inline-block"; // Show the button again
+              scanButton.disabled = false; // Re-enable the button
+              message.textContent = `Barcode Scanned: ${result}`;
+            }
+          },
+          {
+            highlightScanRegion: true,
           }
-        },
-        {
-          highlightScanRegion: true,
+        );
+
+        qrScanner.start();
+      });
+
+      // Cleanup when the page is closed
+      window.addEventListener("beforeunload", () => {
+        if (qrScanner) {
+          qrScanner.destroy();
         }
-      );
-
-      qrScanner.start();
-    });
-
-    // Cleanup when the page is closed
-    window.addEventListener("beforeunload", () => {
-      if (qrScanner) {
-        qrScanner.destroy();
-      }
-    });
+      });
+    };
   </script>
 </body>
 </html>
