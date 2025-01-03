@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Scanner - Version 1.01225</title>
+  <title>Barcode Scanner - Version 1.01226</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -72,9 +72,12 @@
   <video id="video" autoplay></video>
   <div id="message"></div>
   <div id="consoleOutput"></div>
-  <div id="version">Version 1.01225</div>
+  <div id="version">Version 1.01226</div>
 
   <script>
+    // Adding this for debugging script load
+    console.log("Script loading...");
+
     // Direct import from ZXing CDN (restoring to previous working version)
     const script = document.createElement('script');
     script.src = "https://cdn.jsdelivr.net/npm/@zxing/browser@0.18.4/dist/index.min.js";  // Working version for ZXing
@@ -191,6 +194,11 @@
         if (codeReader) codeReader.reset();
         stopContinuousAutofocus();
       });
+    };
+
+    // Debugging the script load status in case the script fails
+    script.onerror = () => {
+      console.log("Failed to load ZXing script.");
     };
   </script>
 </body>
