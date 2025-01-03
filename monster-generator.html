@@ -142,13 +142,13 @@
       return names[Math.floor(Math.random() * names.length)];
     }
 
-    // Generate random stats for the monster with a base level stat
+    // Generate random stats for the monster
     function generateMonsterStats() {
-      const baseLevel = 1;  // Base level stat
       return {
-        HP: Math.floor(Math.random() * 100) + 50 + baseLevel * 10, // Random HP adjusted by level
-        AP: Math.floor(Math.random() * 20) + 10 + baseLevel * 5,  // Random AP adjusted by level
-        Speed: Math.floor(Math.random() * 10) + 5 + baseLevel * 2  // Random Speed adjusted by level
+        HP: Math.floor(Math.random() * 100) + 50, // Random HP between 50 and 150
+        AP: Math.floor(Math.random() * 20) + 10,  // Random AP between 10 and 30
+        Speed: Math.floor(Math.random() * 10) + 5, // Random Speed between 5 and 15
+        Level: Math.random() < 0.1 ? Math.floor(Math.random() * 3) + 2 : 1 // 10% chance for level 2 or 3
       };
     }
 
@@ -190,9 +190,10 @@
                 <div class="info-item">HP:</div><div class="info-value">${stats.HP}</div>
                 <div class="info-item">AP:</div><div class="info-value">${stats.AP}</div>
                 <div class="info-item">Speed:</div><div class="info-value">${stats.Speed}</div>
+                <div class="info-item">Level:</div><div class="info-value">${stats.Level}</div>
               `;
 
-              logToConsole(`Scan Successful: ${resultData}\nMonster ID: ${monsterId}\nName: ${monsterName}\nHP: ${stats.HP}\nAP: ${stats.AP}\nSpeed: ${stats.Speed}`);
+              logToConsole(`Scan Successful: ${resultData}\nMonster ID: ${monsterId}\nName: ${monsterName}\nHP: ${stats.HP}\nAP: ${stats.AP}\nSpeed: ${stats.Speed}\nLevel: ${stats.Level}`);
               qrScanner.stop();
               stopContinuousAutofocus();
               video.style.display = "none";
@@ -202,7 +203,7 @@
           },
           {
             highlightScanRegion: true,
-            preferredScanTypes: ["qr-code", "ean_13", "ean_8", "upc_a", "upc_e", "code_128"], // Added barcode formats
+            preferredScanTypes: ["qr-code", "ean_13", "ean_8", "upc_a", "upc_e", "code_128"], // Added classic barcodes
           }
         );
 
