@@ -1,99 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fighter Collection</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-    .monster-card {
-      background-color: #f0f0f0;
-      margin: 10px;
-      padding: 20px;
-      border-radius: 10px;
-      display: inline-block;
-      text-align: left;
-      width: 200px;
-      border: 1px solid #ddd;
-    }
-    .monster-card h3 {
-      font-size: 20px;
-      color: #333;
-    }
-    .info-item {
-      margin: 5px 0;
-      font-weight: bold;
-    }
-    .info-value {
-      margin-left: 10px;
-      font-weight: normal;
-      color: #333;
-    }
-    #backButton {
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-      margin-top: 20px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monster Collection</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Include your stylesheet -->
 </head>
 <body>
-  <h1>Fighter Collection</h1>
+    <header>
+        <h1>Monster Collection</h1>
+        <div id="playerInfo">
+            <p>Player Name: <span id="playerName">Loading...</span></p>
+            <p>Player ID: <span id="playerID">Loading...</span></p>
+        </div>
+    </header>
 
-  <div id="monsterCollection"></div>
+    <main>
+        <section id="monsterCollection">
+            <h2>Your Monsters</h2>
+            <p>Loading your monster collection...</p>
+        </section>
+    </main>
 
-  <button id="backButton">Back to Main Page</button>
+    <footer>
+        <p>&copy; 2025 Barcode Masters. All rights reserved.</p>
+    </footer>
 
-  <script>
-    // Assuming playerID is stored in localStorage or as part of the URL
-    const playerID = '1001'; // Replace this with the actual player ID from localStorage or URL
+    <script>
+        const playerID = "1001";  // Replace with dynamic player ID if necessary
 
-    // Fetch player data based on the playerID
-    fetch(`https://raw.githubusercontent.com/your-username/your-repository/main/database.json`)
-      .then(response => response.json())
-      .then(data => {
-        const playerData = data[playerID]; // Get the player's data by ID
+        // Load player data from GitHub Pages
+        fetch('https://gumbydevs.github.io/gdevsbcode/database.json')
+          .then(response => response.json())
+          .then(data => {
+            const playerData = data[playerID]; // Get the player's data by ID
 
-        if (playerData && playerData.monsters && playerData.monsters.length > 0) {
-          const monsterCollectionDiv = document.getElementById("monsterCollection");
+            if (playerData) {
+                document.getElementById("playerName").textContent = playerData.playerName;
+                document.getElementById("playerID").textContent = playerID;
 
-          // Display each monster in a card format
-          playerData.monsters.forEach(monster => {
-            const monsterCard = document.createElement("div");
-            monsterCard.classList.add("monster-card");
+                const monsterCollectionDiv = document.getElementById("monsterCollection");
+                if (playerData.monsters && playerData.monsters.length > 0) {
+                    // Clear the loading message
+                    monsterCollectionDiv.innerHTML = '';
 
-            monsterCard.innerHTML = `
-              <h3>${monster.name}</h3>
-              <div class="info-item">Monster ID:</div><div class="info-value">${monster.id}</div>
-              <div class="info-item">Level:</div><div class="info-value">${monster.level}</div>
-              <div class="info-item">HP:</div><div class="info-value">${monster.stats.HP}</div>
-              <div class="info-item">AP:</div><div class="info-value">${monster.stats.AP}</div>
-              <div class="info-item">Speed:</div><div class="info-value">${monster.stats.Speed}</div>
-            `;
+                    playerData.monsters.forEach(monster => {
+                        const monsterCard = document.createElement("div");
+                        monsterCard.classList.add("monster-card");
 
-            monsterCollectionDiv.appendChild(monsterCard);
+                        monsterCard.innerHTML = `
+                            <h3>${monster.name}</h3>
+                            <div class="info-item">Monster ID:</div><div class="info-value">${monster.id}</div>
+                            <div class="info-item">Level:</div><div class="info-value">${monster.level}</div>
+                            <div class="info-item">HP:</div><div class="info-value">${monster.stats.HP}</div>
+                            <div class="info-item">AP:</div><div class="info-value">${monster.stats.AP}</div>
+                            <div class="info-item">Speed:</div><div class="info-value">${monster.stats.Speed}</div>
+                        `;
+
+                        monsterCollectionDiv.appendChild(monsterCard);
+                    });
+                } else {
+                    monsterCollectionDiv.innerHTML = "<p>No monsters in your collection yet.</p>";
+                }
+            } else {
+                document.getElementById("monsterCollection").innerHTML = "<p>No player data found.</p>";
+            }
+          })
+          .catch(error => {
+            console.error("Error loading player data:", error);
+            document.getElementById("monsterCollection").innerHTML = "<p>Error loading data.</p>";
           });
-        } else {
-          document.getElementById("monsterCollection").innerHTML = "<p>No monsters in your collection yet.</p>";
-        }
-      })
-      .catch(error => {
-        console.error("Error loading player data:", error);
-        document.getElementById("monsterCollection").innerHTML = "<p>Error loading data.</p>";
-      });
-
-    // Back button functionality
-    document.getElementById("backButton").addEventListener("click", () => {
-      window.location.href = 'index.html';  // Redirect to the main page or wherever you want
-    });
-  </script>
+    </script>
 </body>
 </html>
