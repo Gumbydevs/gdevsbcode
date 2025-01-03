@@ -38,9 +38,20 @@
       try {
         // Request camera access
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        // Attach the stream to the video element
+
+        // Ensure the stream is successfully applied to the video element
         video.srcObject = stream;
-        message.textContent = "Camera access granted. Video is displayed.";
+
+        // Small timeout to ensure the video feed starts
+        setTimeout(() => {
+          if (video.srcObject) {
+            message.textContent = "Camera access granted. Video is displayed.";
+          } else {
+            message.textContent = "Error: Camera stream not received.";
+            console.error("Error: Camera stream not received.");
+          }
+        }, 500);
+
       } catch (error) {
         message.textContent = `Error: ${error.message}`;
         console.error("Error accessing camera:", error);
