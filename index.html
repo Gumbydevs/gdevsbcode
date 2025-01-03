@@ -3,62 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple Camera Access Test</title>
+  <title>Simple Camera Test</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-    #video {
+    video {
       width: 100%;
-      max-width: 600px;
       height: auto;
-      margin: 10px auto;
       background-color: black;
-      border: 2px solid #ccc;
-    }
-    #message {
-      margin-top: 10px;
-      font-size: 18px;
-      color: green;
     }
   </style>
 </head>
 <body>
-  <h1>Simple Camera Access Test</h1>
+  <h1>Camera Feed</h1>
   <video id="video" autoplay></video>
-  <div id="message"></div>
-
   <script>
-    const video = document.getElementById("video");
-    const message = document.getElementById("message");
-
     async function startCamera() {
       try {
-        // Request camera access
+        const videoElement = document.getElementById("video");
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-
-        // Ensure the stream is successfully applied to the video element
-        video.srcObject = stream;
-
-        // Small timeout to ensure the video feed starts
-        setTimeout(() => {
-          if (video.srcObject) {
-            message.textContent = "Camera access granted. Video is displayed.";
-          } else {
-            message.textContent = "Error: Camera stream not received.";
-            console.error("Error: Camera stream not received.");
-          }
-        }, 500);
-
-      } catch (error) {
-        message.textContent = `Error: ${error.message}`;
-        console.error("Error accessing camera:", error);
+        videoElement.srcObject = stream;
+      } catch (err) {
+        console.error("Error accessing camera: ", err);
       }
     }
 
-    // Call the function to start the camera
     startCamera();
   </script>
 </body>
