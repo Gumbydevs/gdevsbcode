@@ -3,30 +3,169 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple Camera Test</title>
+  <title>Barcode Scanner - Version 1.017</title>
   <style>
-    video {
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    #video {
       width: 100%;
-      height: auto;
-      background-color: black;
+      max-width: 400px;
+      display: none;
+      margin: 10px auto;
+    }
+    #message {
+      margin-top: 10px;
+      font-size: 18px;
+      color: green;
+    }
+    #scanButton {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    #scanButton:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+    #forceScanButton {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      display: none;
+      margin-top: 10px;
+    }
+    #forceScanButton:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+    #consoleOutput {
+      margin-top: 20px;
+      text-align: left;
+      font-size: 14px;
+      color: red;
+      background-color: #f8d7da;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    #version {
+      font-size: 12px;
+      color: gray;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <h1>Camera Feed</h1>
+  <h1>Barcode Scanner</h1>
+  <button id="scanButton">Click to Scan Barcode</button>
+  <button id="forceScanButton">Force Scan</button>
   <video id="video" autoplay></video>
-  <script>
-    async function startCamera() {
-      try {
-        const videoElement = document.getElementById("video");
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        videoElement.srcObject = stream;
-      } catch (err) {
-        console.error("Error accessing camera: ", err);
-      }
+  <div id="message"></div>
+  <div id="consoleOutput"></div>
+  <div id="version">Version 1.017</div>
+
+  <script type="module">
+    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?v=1.017";
+
+    const video = document.getElementById("video");
+    const scanButton = document.getElementById("scanButton");
+    const forceScanButton = document.getElementById("forceScanButton");
+    const message = document.getElementById("message");
+    const consoleOutput = document.getElementById("consoleOutput");
+
+    let qrScanner;
+    let barcodeScanned = false;
+    let focusInterval;
+
+    // Debug logging function to show messages on the webpage
+    function logToConsole(msg) {
+      const logMessage = document.createElement('div');
+      logMessage.textContent = msg;
+      consoleOutput.appendChild(logMessage);
+      console.log(msg);
     }
 
-    startCamera();
+    // Continuous autofocus adjustment
+    function startContinuousAutofocus() {
+      if (focusInterval) clearInterval(focusInterval);
+      focusInterval = setInterval(() => {
+        const track = video.srcObject?.getVideoTracks()[0];
+        if (track) {
+          track.applyConstraints({ advanced: [{ focusMode: "continuous" }] });
+        }
+      }, 2000);
+    }
+
+    function stopContinuousAutofocus() {
+      if (focusInterval) clearInterval(focusInterval);
+    }
+
+    // Start scanning
+    scanButton.addEventListener("click", async () => {
+      logToConsole("Button clicked - starting scan...");
+      barcodeScanned = false;
+      message.textContent = "";
+
+      video.style.display = "block";
+      scanButton.style.display = "none";
+      forceScanButton.style.display = "inline-block";
+
+      try {
+        qrScanner = new QrScanner(
+          video,
+          (result) => {
+            if (!barcodeScanned) {
+              barcodeScanned = true;
+              const resultData = result?.data || "Unknown format";
+              message.textContent = `Scan Successful: ${resultData}`;
+              logToConsole(`Scan Successful: ${resultData}`);
+              qrScanner.stop();
+              stopContinuousAutofocus();
+              video.style.display = "none";
+              scanButton.style.display = "inline-block";
+              forceScanButton.style.display = "none";
+            }
+          },
+          {
+            highlightScanRegion: true,
+            preferredScanTypes: ["qr-code", "ean_13", "ean_8", "upc_a", "upc_e", "code_128"],
+          }
+        );
+
+        await qrScanner.start();
+        startContinuousAutofocus();
+        logToConsole("QR Scanner started...");
+      } catch (error) {
+        logToConsole(`Error: ${error.message}`);
+      }
+    });
+
+    // Force Scan Button click event
+    forceScanButton.addEventListener("click", async () => {
+      logToConsole("Force Scan button clicked...");
+      if (qrScanner) {
+        const result = await qrScanner.scanImage();
+        const resultData = result?.data || "No barcode detected";
+        message.textContent = `Force Scan Result: ${resultData}`;
+        logToConsole(`Force Scan Result: ${resultData}`);
+      }
+    });
+
+    // Cleanup when page is closed
+    window.addEventListener("beforeunload", () => {
+      if (qrScanner) qrScanner.destroy();
+      stopContinuousAutofocus();
+    });
   </script>
 </body>
 </html>
