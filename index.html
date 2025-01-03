@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Scanner - Version 1.0121</title>
+  <title>Barcode Scanner - Version 1.017</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -57,6 +57,28 @@
       background-color: #f8d7da;
       padding: 10px;
       border-radius: 5px;
+      white-space: pre-line;
+    }
+    #monsterInfo {
+      margin-top: 20px;
+      background-color: #e0e0e0;
+      padding: 20px;
+      border-radius: 10px;
+      display: inline-block;
+      text-align: left;
+      font-size: 16px;
+      width: 80%;
+      max-width: 400px;
+      margin: 10px auto;
+    }
+    .info-item {
+      margin: 5px 0;
+      font-weight: bold;
+    }
+    .info-value {
+      margin-left: 10px;
+      font-weight: normal;
+      color: #333;
     }
     #version {
       font-size: 12px;
@@ -72,16 +94,18 @@
   <video id="video" autoplay></video>
   <div id="message"></div>
   <div id="consoleOutput"></div>
+  <div id="monsterInfo"></div>
   <div id="version">Version 1.017</div>
 
   <script type="module">
-    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?v=1.0121";
+    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?v=1.017";
 
     const video = document.getElementById("video");
     const scanButton = document.getElementById("scanButton");
     const forceScanButton = document.getElementById("forceScanButton");
     const message = document.getElementById("message");
     const consoleOutput = document.getElementById("consoleOutput");
+    const monsterInfo = document.getElementById("monsterInfo");
 
     let qrScanner;
     let barcodeScanned = false;
@@ -125,6 +149,15 @@
       };
     }
 
+    // Generate unique monster ID based on barcode data
+    function generateMonsterId(barcodeData) {
+      let id = 0;
+      for (let i = 0; i < barcodeData.length; i++) {
+        id += barcodeData.charCodeAt(i);
+      }
+      return "MONSTER-" + id; // Simple but unique ID based on barcode content
+    }
+
     // Start scanning
     scanButton.addEventListener("click", async () => {
       logToConsole("Button clicked - starting scan...");
@@ -142,11 +175,20 @@
             if (!barcodeScanned) {
               barcodeScanned = true;
               const resultData = result?.data || "Unknown format";
-              const monsterId = "MONSTER-" + Math.floor(Math.random() * 100000); // Unique ID for the monster
+              const monsterId = generateMonsterId(resultData); // Unique ID based on barcode
               const monsterName = generateRandomName();
               const stats = generateMonsterStats();
 
-              message.textContent = `Scan Successful: ${resultData}\nMonster ID: ${monsterId}\nName: ${monsterName}\nHP: ${stats.HP}\nAP: ${stats.AP}\nSpeed: ${stats.Speed}`;
+              // Update the message with nicely formatted monster info
+              message.textContent = `Scan Successful: ${resultData}`;
+              monsterInfo.innerHTML = `
+                <div class="info-item">Monster ID:</div><div class="info-value">${monsterId}</div>
+                <div class="info-item">Name:</div><div class="info-value">${monsterName}</div>
+                <div class="info-item">HP:</div><div class="info-value">${stats.HP}</div>
+                <div class="info-item">AP:</div><div class="info-value">${stats.AP}</div>
+                <div class="info-item">Speed:</div><div class="info-value">${stats.Speed}</div>
+              `;
+
               logToConsole(`Scan Successful: ${resultData}\nMonster ID: ${monsterId}\nName: ${monsterName}\nHP: ${stats.HP}\nAP: ${stats.AP}\nSpeed: ${stats.Speed}`);
               qrScanner.stop();
               stopContinuousAutofocus();
