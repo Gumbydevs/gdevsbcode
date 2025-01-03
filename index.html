@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Scanner - Version 1.015</title>
+  <title>Barcode Scanner - Version 1.016</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -72,10 +72,10 @@
   <video id="video" autoplay></video>
   <div id="message"></div>
   <div id="consoleOutput"></div>
-  <div id="version">Version 1.015</div>
+  <div id="version">Version 1.016</div>
 
   <script type="module">
-    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?v=1.015"; // Cache bust versioning
+    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?v=1.016"; // Cache bust versioning
     
     const video = document.getElementById("video");
     const scanButton = document.getElementById("scanButton");
@@ -104,7 +104,7 @@
           const capabilities = track.getCapabilities();
           if (capabilities.focusDistance) {
             track.applyConstraints({
-              advanced: [{ focusDistance: 0.5 }] // Adjust this value as needed
+              advanced: [{ focusMode: "continuous" }] // Use continuous focus
             }).then(() => logToConsole("Camera focus adjusted."));
           }
         }
@@ -135,7 +135,7 @@
         qrScanner = new QrScanner(
           video,
           (result) => {
-            logToConsole(`Scan result: ${result}`);
+            logToConsole(`Scan result object: ${JSON.stringify(result)}`);
             if (!barcodeScanned) {
               barcodeScanned = true;
               qrScanner.stop(); // Stop scanning after first successful scan
@@ -143,7 +143,11 @@
               video.style.display = "none"; // Hide video feed
               scanButton.style.display = "inline-block"; // Re-enable the scan button
               forceScanButton.style.display = "none"; // Hide force scan button
-              message.textContent = `Scan Successful: ${result}`;
+
+              // Display and log result data
+              const resultData = result?.data || "Unknown format";
+              message.textContent = `Scan Successful: ${resultData}`;
+              logToConsole(`Scan Successful: ${resultData}`);
             }
           },
           {
@@ -168,8 +172,9 @@
       if (qrScanner) {
         const result = await qrScanner.scan();
         if (result) {
-          message.textContent = `Scan Successful: ${result}`;
-          logToConsole(`Forced Scan result: ${result}`);
+          const resultData = result?.data || "Unknown format";
+          message.textContent = `Forced Scan Successful: ${resultData}`;
+          logToConsole(`Forced Scan Successful: ${resultData}`);
         } else {
           message.textContent = "No barcode detected.";
           logToConsole("Forced Scan: No barcode detected.");
