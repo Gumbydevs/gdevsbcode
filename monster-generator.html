@@ -93,7 +93,7 @@
     <button class="button" onclick="window.location.href='fighter-collection.html'">Fighter Collection</button>
     <button class="button" onclick="window.location.href='monster-training.html'">Monster Training</button>
     <button class="button" onclick="window.location.href='pvp-battle.html'">PVP Battle</button>
-      <button class="button" onclick="window.location.href='help.html'">Help</button>
+    <button class="button" onclick="window.location.href='help.html'">Help</button>
     <button class="button" onclick="window.location.href='index.html'">Main Page</button>
   </div>
 
@@ -144,14 +144,26 @@
       return names[Math.floor(Math.random() * names.length)];
     }
 
-    // Generate random stats for the monster
-    function generateMonsterStats() {
-      return {
+    // Generate random stats for the monster, with boosts for higher levels
+    function generateMonsterStats(level) {
+      let stats = {
         HP: Math.floor(Math.random() * 100) + 50, // Random HP between 50 and 150
         AP: Math.floor(Math.random() * 20) + 10,  // Random AP between 10 and 30
         Speed: Math.floor(Math.random() * 10) + 5, // Random Speed between 5 and 15
-        Level: Math.random() < 0.1 ? Math.floor(Math.random() * 3) + 2 : 1 // 10% chance for level 2 or 3
       };
+
+      // If level 2 or 3, boost stats
+      if (level === 2) {
+        stats.HP = Math.floor(stats.HP * 1.2); // 20% boost
+        stats.AP = Math.floor(stats.AP * 1.2); // 20% boost
+        stats.Speed = Math.floor(stats.Speed * 1.2); // 20% boost
+      } else if (level === 3) {
+        stats.HP = Math.floor(stats.HP * 1.5); // 50% boost
+        stats.AP = Math.floor(stats.AP * 1.5); // 50% boost
+        stats.Speed = Math.floor(stats.Speed * 1.5); // 50% boost
+      }
+
+      return stats;
     }
 
     // Generate unique monster ID based on barcode data
@@ -182,7 +194,12 @@
               const resultData = result?.data || "Unknown format";
               const monsterId = generateMonsterId(resultData); // Unique ID based on barcode
               const monsterName = generateRandomName();
-              const stats = generateMonsterStats();
+              
+              // Random level with 10% chance of level 2 or 3
+              const level = Math.random() < 0.1 ? Math.floor(Math.random() * 3) + 2 : 1;
+
+              // Generate stats based on the level
+              const stats = generateMonsterStats(level);
 
               // Update the message with nicely formatted monster info
               message.textContent = `Scan Successful: ${resultData}`;
@@ -192,10 +209,10 @@
                 <div class="info-item">HP:</div><div class="info-value">${stats.HP}</div>
                 <div class="info-item">AP:</div><div class="info-value">${stats.AP}</div>
                 <div class="info-item">Speed:</div><div class="info-value">${stats.Speed}</div>
-                <div class="info-item">Level:</div><div class="info-value">${stats.Level}</div>
+                <div class="info-item">Level:</div><div class="info-value">${level}</div>
               `;
 
-              logToConsole(`Scan Successful: ${resultData}\nMonster ID: ${monsterId}\nName: ${monsterName}\nHP: ${stats.HP}\nAP: ${stats.AP}\nSpeed: ${stats.Speed}\nLevel: ${stats.Level}`);
+              logToConsole(`Scan Successful: ${resultData}\nMonster ID: ${monsterId}\nName: ${monsterName}\nHP: ${stats.HP}\nAP: ${stats.AP}\nSpeed: ${stats.Speed}\nLevel: ${level}`);
               qrScanner.stop();
               stopContinuousAutofocus();
               video.style.display = "none";
