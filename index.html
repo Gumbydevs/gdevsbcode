@@ -51,7 +51,7 @@
   </style>
 </head>
 <body>
-  <h1>Barcode & QR Code Scanner</h1>
+  <h1>Scan to create your fighter!</h1>
   <button id="scanButton">Click to Scan Barcode or QR Code</button>
   <button id="forceScanButton">Force Scan</button>
   <video id="video" autoplay></video>
@@ -61,7 +61,7 @@
   <div id="consoleOutput"></div>
 
   <!-- Updated with version number to bust cache -->
-  <script src="https://unpkg.com/@zxing/library@0.18.6/dist/index.min.js?v=1.01"></script>
+  <script src="https://unpkg.com/@zxing/library@0.18.6/dist/index.min.js?v=1.02"></script>
 
   <script>
     const video = document.getElementById("video");
@@ -83,7 +83,7 @@
 
     // Start scanning when the button is clicked
     scanButton.addEventListener("click", () => {
-      logToConsole("Scan button clicked.");
+      logToConsole("Scan button clicked."); // Log when the button is clicked
 
       // Reset previous scan state
       barcodeScanned = false;
