@@ -34,6 +34,21 @@
       background-color: #6c757d;
       cursor: not-allowed;
     }
+    #forceScanButton {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      display: none;
+      margin-top: 10px;
+    }
+    #forceScanButton:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
     #consoleOutput {
       margin-top: 20px;
       text-align: left;
@@ -53,16 +68,18 @@
 <body>
   <h1>Barcode Scanner</h1>
   <button id="scanButton">Click to Scan Barcode</button>
+  <button id="forceScanButton">Force Scan</button>
   <video id="video" autoplay></video>
   <div id="message"></div>
   <div id="consoleOutput"></div>
-  <div id="version">Version 1.012</div>
+  <div id="version">Version 1.013</div>
 
   <script type="module">
-    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?v=1.012"; // Added versioning for cache busting
+    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?v=1.013"; // Cache bust versioning
     
     const video = document.getElementById("video");
     const scanButton = document.getElementById("scanButton");
+    const forceScanButton = document.getElementById("forceScanButton");
     const message = document.getElementById("message");
     const consoleOutput = document.getElementById("consoleOutput");
 
@@ -83,9 +100,10 @@
       barcodeScanned = false; // Reset previous scan state
       message.textContent = "";
 
-      // Show video feed and disable the button
+      // Show video feed, hide scan button, and show force scan button
       video.style.display = "block";
-      scanButton.disabled = true;
+      scanButton.style.display = "none"; // Hide the scan button
+      forceScanButton.style.display = "inline-block"; // Show force scan button
 
       try {
         // Initialize QR Scanner
@@ -97,12 +115,14 @@
               barcodeScanned = true;
               qrScanner.stop(); // Stop scanning after first successful scan
               video.style.display = "none"; // Hide video feed
-              scanButton.disabled = false; // Re-enable the button
+              scanButton.style.display = "inline-block"; // Re-enable the scan button
+              forceScanButton.style.display = "none"; // Hide force scan button
               message.textContent = `Scan Successful: ${result}`;
             }
           },
           {
             highlightScanRegion: true,
+            // Additional configurations if needed
           }
         );
 
@@ -111,6 +131,14 @@
         logToConsole("QR Scanner started...");
       } catch (error) {
         logToConsole(`Error: ${error.message}`);
+      }
+    });
+
+    // Force Scan Button click event
+    forceScanButton.addEventListener("click", async () => {
+      logToConsole("Force Scan button clicked...");
+      if (qrScanner) {
+        qrScanner.scan(); // Force the scanner to scan manually
       }
     });
 
