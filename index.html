@@ -9,12 +9,17 @@
       font-family: Arial, sans-serif;
       text-align: center;
       padding: 20px;
+      margin: 0;
+      background-color: #f8f9fa;
     }
     #video {
       width: 100%;
       max-width: 400px;
       display: none;
-      margin: 10px auto;
+      margin: 20px auto;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
     #message {
       margin-top: 10px;
@@ -22,17 +27,30 @@
       color: green;
     }
     #scanButton {
-      padding: 10px 20px;
+      padding: 12px 24px;
       font-size: 16px;
       background-color: #007bff;
       color: white;
       border: none;
       cursor: pointer;
       border-radius: 5px;
+      transition: background-color 0.3s;
     }
     #scanButton:disabled {
       background-color: #6c757d;
       cursor: not-allowed;
+    }
+    #scanButton:hover:enabled {
+      background-color: #0056b3;
+    }
+    @media (max-width: 600px) {
+      #scanButton {
+        padding: 10px 18px;
+        font-size: 14px;
+      }
+      #video {
+        max-width: 100%;
+      }
     }
   </style>
 </head>
