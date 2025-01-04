@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode DNA Extractor - Version 0.033</title>
+  <title>Barcode DNA Extractor - Version 0.032</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -129,11 +129,14 @@
     <button onclick="window.location.href='index.html'">Main Page</button>
   </div>
   <div id="consoleOutput"></div>
-  <div id="version">Version 0.033</div>
+  <div id="version">Version 0.032</div>
   <div style="font-size: 12px; color: gray; margin-top: 20px;">&copy; 2025 Barcode Masters. All rights reserved.</div>
 
   <script type="module">
     import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?v=1.018";
+    const apiKey = 'AIzaSyAvSQBek_khqKh5ZEYhWcqlF0taRg_Q1R4';
+    const clientId = '472252081207-mpmsv3vd6p2ej50cokl2a0jhiepla90t.apps.googleusercontent.com';
+    const spreadsheetId = '15s90AxqNSzv-K_639ffokf-6Zd5tSFdHeBPFZIyG7Jc'; // Replace with your spreadsheet ID
 
     const video = document.getElementById("video");
     const scanButton = document.getElementById("scanButton");
@@ -200,38 +203,21 @@
       `;
     }
 
-    scanButton.addEventListener("click", async () => {
-      barcodeScanned = false;
-      message.textContent = "Scanning...";
-
+    async function saveToGoogleSheet(monster) {
       try {
-        qrScanner = new QrScanner(
-          video,
-          async (result) => {
-            if (!barcodeScanned) {
-              barcodeScanned = true;
-              const monster = generateMonster(result.data);
-              message.innerHTML = `<strong>${monster.name}</strong> - Scan Successful!`;
-              qrScanner.stop();
-              video.style.display = "none";
-              scanButton.style.display = "block";
-              forceScanButton.style.display = "none";
-              logToConsole(`Scan Result: ${result.data}`);
-              displayMonsterInfo(monster);
-              await saveToGoogleSheet(monster);
-            }
-          },
-          {
-            highlightScanRegion: true,
-          }
-        );
+        await gapi.client.init({
+          apiKey: apiKey,
+          clientId: clientId,
+          discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
+          scope: "https://www.googleapis.com/auth/spreadsheets"
+        });
 
-        video.style.display = "block";
-        scanButton.style.display = "none";
-        forceScanButton.style.display = "inline-block";
+        const params = {
+          spreadsheetId: spreadsheetId,
+          range: 'MonsterInfo!A1',
+          valueInputOption: 'RAW',
+          insertDataOption: 'INSERT_ROWS',
+        };
 
-        await qrScanner.start();
-        logToConsole("QR Scanner started...");
-      } catch (error) {
-        logToConsole(`Error: ${error.message}`);
-[_{{{CITATION{{{_1{](https://github.com/pasipiya/barcode-reader/tree/983075fc014d2c0d88f447ff8d462bd87db9bcd6/index.php)
+        const valueRangeBody = {
+          values: [_{{{CITATION{{{_1{](https://github.com/blocklet/development-guide/tree/532870eb469508c74f1185266abd1578a2e8acb9/src%2Fdeveloper%2Fstatic-blocklet%2Findex.md)
