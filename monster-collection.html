@@ -1,177 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monster Collection</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Include your common stylesheet -->
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            background-color: #333;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 2rem;
-        }
-
-        #playerInfo {
-            font-size: 1rem;
-            margin-top: 10px;
-        }
-
-        #playerInfo span {
-            font-weight: bold;
-        }
-
-        main {
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        #monsterCollection {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-            width: 100%;
-            max-width: 1000px;
-        }
-
-        .monster-card {
-            background-color: #fff;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            transition: transform 0.2s ease-in-out;
-        }
-
-        .monster-card:hover {
-            transform: scale(1.05);
-        }
-
-        .monster-card h3 {
-            font-size: 1.5rem;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .info-item {
-            font-weight: bold;
-            margin-top: 5px;
-            color: #555;
-        }
-
-        .info-value {
-            font-weight: normal;
-            color: #777;
-        }
-
-        .placeholder {
-            width: 150px;
-            height: 150px;
-            background-color: #ddd;
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #555;
-            font-size: 0.9rem;
-            font-style: italic;
-            margin-top: 10px;
-        }
-
-        footer {
-            background-color: #333;
-            color: white;
-            padding: 10px;
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        footer p {
-            margin: 0;
-            font-size: 0.9rem;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barcode DNA Extractor - Version 0.032</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background-color: #f9f9f9;
+    }
+    h1 {
+      margin: 20px 0;
+      font-size: 24px;
+    }
+    #video {
+      width: 90%;
+      max-width: 400px;
+      height: auto;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 4px;
+      margin: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    #message, #monsterInfo {
+      margin: 10px 0;
+      font-size: 16px;
+      color: #333;
+      text-align: center;
+    }
+    #monsterInfo {
+      background-color: #eef;
+      padding: 15px;
+      border: 2px solid #007bff;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+    }
+    #monsterInfo div {
+      margin: 5px 0;
+    }
+    .info-item {
+      font-weight: bold;
+    }
+    #consoleOutput {
+      font-size: 14px;
+      margin-top: 20px;
+      max-height: 200px;
+      overflow-y: auto;
+      background-color: #eee;
+      padding: 10px;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 8px;
+    }
+    #version {
+      font-size: 14px;
+      color: #666;
+      margin-top: 20px;
+    }
+    /* Updated styles for the larger placeholder */
+    #imagePlaceholder {
+      visibility: hidden; /* Hidden by default */
+      width: 70%; /* Increased size */
+      max-width: 210px; /* Increased maximum width */
+      height: 120px; /* Increased height */
+      border: 2px dashed #007bff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px; /* Adjusted font size */
+      color: #007bff;
+      margin-bottom: 10px;
+    }
+    /* Style for the disclaimer text */
+    #disclaimer {
+      font-size: 12px;
+      color: #888;
+      margin-top: 20px;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>Monster Collection</h1>
-        <div id="playerInfo">
-            <p>Player Name: <span id="playerName">Loading...</span></p>
-            <p>Player ID: <span id="playerID">Loading...</span></p>
-        </div>
-    </header>
+  <h1>Barcode DNA Extractor</h1>
+  <button id="scanButton">Click to Scan Barcode</button>
+   <!-- Disclaimer text about QR codes -->
+  <div id="disclaimer">
+    <p>* Please note: The scanner currently only supports QR codes as barcode functionality is temporarily broken.</p>
+  </div>
+  <button id="forceScanButton" style="display:none;">Force Scan</button>
+  <video id="video" autoplay></video>
+  <div id="message"></div>
+  <div id="imagePlaceholder">AI generated appearance placeholder</div>
+  <div id="monsterInfo"></div>
+  <div class="buttons">
+    <button onclick="window.location.href='fighter-collection.html'">Fighter Collection</button>
+    <button onclick="window.location.href='monster-training.html'">Monster Training</button>
+    <button onclick="window.location.href='pvp-battle.html'">PVP Battle</button>
+    <button onclick="window.location.href='help.html'">Help</button>
+    <button onclick="window.location.href='index.html'">Main Page</button>
+  </div>
+  <div id="consoleOutput"></div>
+  <div id="version">Version 0.032</div>
+  <div style="font-size: 12px; color: gray; margin-top: 20px;">&copy; 2025 Barcode Masters. All rights reserved.</div>
 
-    <main>
-        <section id="monsterCollection">
-            <p>Loading your monster collection...</p>
-        </section>
-    </main>
+  <script type="module">
+    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?v=1.018";
+    const apiKey = 'AIzaSyAvSQBek_khqKh5ZEYhWcqlF0taRg_Q1R4';
+    const clientId = '472252081207-mpmsv3vd6p2ej50cokl2a0jhiepla90t.apps.googleusercontent.com';
+    const spreadsheetId = '15s90AxqNSzv-K_639ffokf-6Zd5tSFdHeBPFZIyG7Jc'; // Replace with your spreadsheet ID
 
-    <footer>
-        <p>&copy; 2025 Barcode Masters. All rights reserved.</p>
-    </footer>
+    const video = document.getElementById("video");
+    const scanButton = document.getElementById("scanButton");
+    const forceScanButton = document.getElementById("forceScanButton");
+    const message = document.getElementById("message");
+    const consoleOutput = document.getElementById("consoleOutput");
+    const monsterInfo = document.getElementById("monsterInfo");
+    const imagePlaceholder = document.getElementById("imagePlaceholder");
 
-    <script>
-        const playerID = "1001";  // Replace with dynamic player ID if necessary
+    let qrScanner;
+    let barcodeScanned = false;
 
-        // Load player data from GitHub Pages
-        fetch('https://gumbydevs.github.io/gdevsbcode/database.json')
-          .then(response => response.json())
-          .then(data => {
-            const playerData = data[playerID]; // Get the player's data by ID
+    function logToConsole(msg) {
+      const logMessage = document.createElement('div');
+      logMessage.textContent = msg;
+      consoleOutput.appendChild(logMessage);
+      console.log(msg);
+    }
 
-            if (playerData) {
-                document.getElementById("playerName").textContent = playerData.playerName;
-                document.getElementById("playerID").textContent = playerID;
+    function hashCode(str) {
+      return str.split('').reduce((hash, char) => {
+        return (hash << 5) - hash + char.charCodeAt(0);
+      }, 0);
+    }
 
-                const monsterCollectionDiv = document.getElementById("monsterCollection");
-                if (playerData.monsters && playerData.monsters.length > 0) {
-                    // Clear the loading message
-                    monsterCollectionDiv.innerHTML = '';
+    function seededRandom(seed) {
+      let x = Math.sin(seed++) * 10000;
+      return x - Math.floor(x);
+    }
 
-                    playerData.monsters.forEach(monster => {
-                        const monsterCard = document.createElement("div");
-                        monsterCard.classList.add("monster-card");
+    function generateMonster(barcode) {
+      const seed = Math.abs(hashCode(barcode));
+      const random = (min, max) => Math.floor(seededRandom(seed) * (max - min + 1) + min);
 
-                        monsterCard.innerHTML = `
-                            <h3>${monster.name}</h3>
-                            <div class="placeholder">Monster AI generated appearance placeholder</div>
-                            <div class="info-item">Monster ID:</div><div class="info-value">${monster.id}</div>
-                            <div class="info-item">Level:</div><div class="info-value">${monster.level}</div>
-                            <div class="info-item">HP:</div><div class="info-value">${monster.stats.HP}</div>
-                            <div class="info-item">AP:</div><div class="info-value">${monster.stats.AP}</div>
-                            <div class="info-item">Speed:</div><div class="info-value">${monster.stats.Speed}</div>
-                        `;
+      const monsterID = Math.random().toString(36).substr(2, 15).toUpperCase();
+      const names = ["Zylar", "Grunth", "Floran", "Drixel", "Morzar", "Klynn", "Valkar", "Threx", "Oblis", "Xentor"];
+      const randomName = names[random(0, names.length - 1)];
+      const level = random(1, 3);
+      const hp = random(10, 20) * level;
+      const ap = random(5, 10) * level;
+      const speed = random(1, 5) * level;
 
-                        monsterCollectionDiv.appendChild(monsterCard);
-                    });
-                } else {
-                    monsterCollectionDiv.innerHTML = "<p>No monsters in your collection yet.</p>";
-                }
-            } else {
-                document.getElementById("monsterCollection").innerHTML = "<p>No player data found.</p>";
-            }
-          })
-          .catch(error => {
-            console.error("Error loading player data:", error);
-            document.getElementById("monsterCollection").innerHTML = "<p>Error loading data.</p>";
-          });
-    </script>
-</body>
-</html>
+      return {
+        id: monsterID,
+        name: randomName,
+        hp,
+        ap,
+        speed,
+        level,
+        barcode,
+      };
+    }
+
+    function displayMonsterInfo(monster) {
+      imagePlaceholder.style.visibility = "visible"; // Make placeholder visible after scan
+      monsterInfo.innerHTML = ` 
+        <div><span class="info-item">ID:</span> <span class="info-value">${monster.id}</span></div>
+        <div><span class="info-item">Name:</span> <span class="info-value">${monster.name}</span></div>
+        <div><span class="info-item">Level:</span> <span class="info-value">${monster.level}</span></div>
+        <div><span class="info-item">HP:</span> <span class="info-value">${monster.hp}</span></div>
+        <div><span class="info-item">AP:</span> <span class="info-value">${monster.ap}</span></div>
+        <div><span class="info-item">Speed:</span> <span class="info-value">${monster.speed}</span></div>
+        <div><span class="info-item">DNA Source Code:</span> <span class="info-value">${monster.barcode}</span></div>
+      `;
+    }
+
+    scanButton.addEventListener("click", async () => {
+      barcodeScanned = false;
+      message.textContent = "Scanning...";
+
+      try {
+        qrScanner = new QrScanner(
+          video,
+          async (result) => {
+            if (!barcodeScanned) {
+              barcodeScanned = true;
+              const monster = generateMonster(result.data);
+              message.innerHTML = `<strong>${monster.name}</strong> - Scan Successful!`;
+              qrScanner.stop();
+              video.style.display = "none";
+              scanButton[_{{{CITATION{{{_1{](https://github.com/blocklet/development-guide/tree/532870eb469508c74f1185266abd1578a2e8acb9/src%2Fdeveloper%2Fstatic-blocklet%2Findex.md)
