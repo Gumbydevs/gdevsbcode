@@ -16,10 +16,12 @@
       min-height: 100vh;
       background-color: #f9f9f9;
     }
+
     h1 {
       margin: 20px 0;
       font-size: 24px;
     }
+
     #video {
       width: 90%;
       max-width: 400px;
@@ -28,6 +30,7 @@
       border-radius: 8px;
       margin: 10px 0;
     }
+
     button {
       background-color: #007bff;
       color: white;
@@ -39,9 +42,11 @@
       cursor: pointer;
       transition: background-color 0.3s;
     }
+
     button:hover {
       background-color: #0056b3;
     }
+
     .buttons {
       display: flex;
       flex-wrap: wrap;
@@ -49,12 +54,15 @@
       gap: 10px;
       margin-top: 20px;
     }
-    #message, #monsterInfo {
+
+    #message,
+    #monsterInfo {
       margin: 10px 0;
       font-size: 16px;
       color: #333;
       text-align: center;
     }
+
     #monsterInfo {
       background-color: #eef;
       padding: 15px;
@@ -63,12 +71,15 @@
       width: 90%;
       max-width: 400px;
     }
+
     #monsterInfo div {
       margin: 5px 0;
     }
+
     .info-item {
       font-weight: bold;
     }
+
     #consoleOutput {
       font-size: 14px;
       margin-top: 20px;
@@ -80,11 +91,13 @@
       max-width: 400px;
       border-radius: 8px;
     }
+
     #version {
       font-size: 14px;
       color: #666;
       margin-top: 20px;
     }
+
     /* Updated styles for the larger placeholder */
     #imagePlaceholder {
       visibility: hidden; /* Hidden by default */
@@ -100,6 +113,7 @@
       color: #007bff;
       margin-bottom: 10px;
     }
+
     /* Style for the disclaimer text */
     #disclaimer {
       font-size: 12px;
@@ -109,18 +123,22 @@
     }
   </style>
 </head>
+
 <body>
   <h1>Barcode DNA Extractor</h1>
   <button id="scanButton">Click to Scan Barcode</button>
-   <!-- Disclaimer text about QR codes -->
+
+  <!-- Disclaimer text about QR codes -->
   <div id="disclaimer">
     <p>* Please note: The scanner currently only supports QR codes as barcode functionality is temporarily broken.</p>
   </div>
+
   <button id="forceScanButton" style="display:none;">Force Scan</button>
   <video id="video" autoplay></video>
   <div id="message"></div>
   <div id="imagePlaceholder">AI generated appearance placeholder</div>
   <div id="monsterInfo"></div>
+
   <div class="buttons">
     <button onclick="window.location.href='fighter-collection.html'">Fighter Collection</button>
     <button onclick="window.location.href='monster-training.html'">Monster Training</button>
@@ -128,15 +146,14 @@
     <button onclick="window.location.href='help.html'">Help</button>
     <button onclick="window.location.href='index.html'">Main Page</button>
   </div>
+
   <div id="consoleOutput"></div>
   <div id="version">Version 0.032</div>
+
   <div style="font-size: 12px; color: gray; margin-top: 20px;">&copy; 2025 Barcode Masters. All rights reserved.</div>
 
   <script type="module">
     import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner/qr-scanner.min.js?v=1.018";
-    const apiKey = 'AIzaSyAvSQBek_khqKh5ZEYhWcqlF0taRg_Q1R4';
-    const clientId = '472252081207-mpmsv3vd6p2ej50cokl2a0jhiepla90t.apps.googleusercontent.com';
-    const spreadsheetId = '15s90AxqNSzv-K_639ffokf-6Zd5tSFdHeBPFZIyG7Jc'; // Replace with your spreadsheet ID
 
     const video = document.getElementById("video");
     const scanButton = document.getElementById("scanButton");
@@ -170,7 +187,6 @@
     function generateMonster(barcode) {
       const seed = Math.abs(hashCode(barcode));
       const random = (min, max) => Math.floor(seededRandom(seed) * (max - min + 1) + min);
-
       const monsterID = Math.random().toString(36).substr(2, 15).toUpperCase();
       const names = ["Zylar", "Grunth", "Floran", "Drixel", "Morzar", "Klynn", "Valkar", "Threx", "Oblis", "Xentor"];
       const randomName = names[random(0, names.length - 1)];
@@ -192,7 +208,7 @@
 
     function displayMonsterInfo(monster) {
       imagePlaceholder.style.visibility = "visible"; // Make placeholder visible after scan
-      monsterInfo.innerHTML = ` 
+      monsterInfo.innerHTML = `
         <div><span class="info-item">ID:</span> <span class="info-value">${monster.id}</span></div>
         <div><span class="info-item">Name:</span> <span class="info-value">${monster.name}</span></div>
         <div><span class="info-item">Level:</span> <span class="info-value">${monster.level}</span></div>
@@ -203,21 +219,48 @@
       `;
     }
 
-    async function saveToGoogleSheet(monster) {
+    scanButton.addEventListener("click", async () => {
+      barcodeScanned = false;
+      message.textContent = "Scanning...";
       try {
-        await gapi.client.init({
-          apiKey: apiKey,
-          clientId: clientId,
-          discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest?version=v4"],
-          scope: "https://www.googleapis.com/auth/spreadsheets"
-        });
+        qrScanner = new QrScanner(
+          video,
+          (result) => {
+            if (!barcodeScanned) {
+              barcodeScanned = true;
+              const monster = generateMonster(result.data);
+              message.innerHTML = `<strong>${monster.name}</strong> - Scan Successful!`;
+              qrScanner.stop();
+              video.style.display = "none";
+              scanButton.style.display = "block";
+              forceScanButton.style.display = "none";
+              logToConsole(`Scan Result: ${result.data}`);
+              displayMonsterInfo(monster);
+            }
+          },
+          { highlightScanRegion: true }
+        );
+        video.style.display = "block";
+        scanButton.style.display = "none";
+        forceScanButton.style.display = "inline-block";
+        await qrScanner.start();
+        logToConsole("QR Scanner started...");
+      } catch (error) {
+        logToConsole(`Error: ${error.message}`);
+      }
+    });
 
-        const params = {
-          spreadsheetId: spreadsheetId,
-          range: 'MonsterInfo!A1',
-          valueInputOption: 'RAW',
-          insertDataOption: 'INSERT_ROWS',
-        };
+    forceScanButton.addEventListener("click", async () => {
+      if (qrScanner) {
+        const result = await qrScanner.scanImage();
+        message.textContent = `Force Scan Result: ${result?.data || "No barcode detected"}`;
+        logToConsole(`Force Scan Result: ${result?.data || "No barcode detected"}`);
+      }
+    });
 
-        const valueRangeBody = {
-          values: [_{{{CITATION{{{_1{](https://github.com/blocklet/development-guide/tree/532870eb469508c74f1185266abd1578a2e8acb9/src%2Fdeveloper%2Fstatic-blocklet%2Findex.md)
+    window.addEventListener("beforeunload", () => {
+      if (qrScanner) qrScanner.destroy();
+    });
+  </script>
+</body>
+</html>
