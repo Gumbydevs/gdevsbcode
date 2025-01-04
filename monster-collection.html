@@ -107,7 +107,6 @@
             font-size: 0.9rem;
         }
     </style>
-    <!-- Updated Content Security Policy with required script sources -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://apis.google.com https://cdn.jsdelivr.net https://www.gstatic.com; style-src 'self' 'unsafe-inline';">
     <script src="https://apis.google.com/js/api.js"></script>
 </head>
@@ -146,6 +145,17 @@
           return JSON.parse(jsonPayload);
         }
 
+        async function loadPlayerInfo() {
+            const userData = localStorage.getItem('userData');
+            if (userData) {
+                const user = parseJwt(userData);
+                document.getElementById("playerName").textContent = user.name || "Player Name";
+                document.getElementById("playerID").textContent = playerID;
+            } else {
+                console.log("No user data found in local storage");
+            }
+        }
+
         async function loadMonsterCollection() {
             try {
                 // Initialize Google API client
@@ -156,13 +166,29 @@
                     scope: "https://www.googleapis.com/auth/spreadsheets.readonly"
                 });
 
-                // Load the spreadsheet data
-                const response = await gapi.client.sheets.spreadsheets.values.get({
+                // Load the player data (PlayerInfo)
+                const playerResponse = await gapi.client.sheets.spreadsheets.values.get({
+                    spreadsheetId: spreadsheetId,
+                    range: 'PlayerInfo!A2:H', // Adjust range to match your PlayerInfo data
+                });
+
+                const playerData = playerResponse.result.values;
+                if (playerData.length > 0) {
+                    // Assuming PlayerInfo contains playerID and playerName in columns A and B
+                    const playerInfo = playerData.find(row => row[0] == playerID); // Match playerID
+                    if (playerInfo) {
+                        document.getElementById("playerName").textContent = playerInfo[1]; // Player Name
+                        document.getElementById("playerID").textContent = playerInfo[0]; // Player ID
+                    }
+                }
+
+                // Load the monster collection data (MonsterInfo)
+                const monsterResponse = await gapi.client.sheets.spreadsheets.values.get({
                     spreadsheetId: spreadsheetId,
                     range: 'MonsterInfo!A2:J', // Adjust the range as needed
                 });
 
-                const rows = response.result.values;
+                const rows = monsterResponse.result.values;
                 const monsterCollectionDiv = document.getElementById("monsterCollection");
 
                 if (rows.length > 0) {
@@ -170,38 +196,29 @@
                     monsterCollectionDiv.innerHTML = '';
 
                     rows.forEach(row => {
-                        const monsterCard = document.createElement("div");
-                        monsterCard.classList.add("monster-card");
+                        if (row[1] == playerID) { // Only load monsters for the current player
+                            const monsterCard = document.createElement("div");
+                            monsterCard.classList.add("monster-card");
 
-                        monsterCard.innerHTML = `
-                            <h3>${row[3]}</h3>
-                            <div class="placeholder">Monster AI generated appearance placeholder</div>
-                            <div class="info-item">Monster ID:</div><div class="info-value">${row[0]}</div>
-                            <div class="info-item">Level:</div><div class="info-value">${row[7]}</div>
-                            <div class="info-item">HP:</div><div class="info-value">${row[4]}</div>
-                            <div class="info-item">AP:</div><div class="info-value">${row[5]}</div>
-                            <div class="info-item">Speed:</div><div class="info-value">${row[6]}</div>
-                        `;
+                            monsterCard.innerHTML = `
+                                <h3>${row[3]}</h3>
+                                <div class="placeholder">Monster AI generated appearance placeholder</div>
+                                <div class="info-item">Monster ID:</div><div class="info-value">${row[0]}</div>
+                                <div class="info-item">Level:</div><div class="info-value">${row[7]}</div>
+                                <div class="info-item">HP:</div><div class="info-value">${row[4]}</div>
+                                <div class="info-item">AP:</div><div class="info-value">${row[5]}</div>
+                                <div class="info-item">Speed:</div><div class="info-value">${row[6]}</div>
+                            `;
 
-                        monsterCollectionDiv.appendChild(monsterCard);
+                            monsterCollectionDiv.appendChild(monsterCard);
+                        }
                     });
                 } else {
                     monsterCollectionDiv.innerHTML = "<p>No monsters in your collection yet.</p>";
                 }
             } catch (error) {
-                console.error("Error loading monster collection:", error);
+                console.error("Error loading data:", error);
                 document.getElementById("monsterCollection").innerHTML = "<p>Error loading data.</p>";
-            }
-        }
-
-        function loadPlayerInfo() {
-            const userData = localStorage.getItem('userData');
-            if (userData) {
-                const user = parseJwt(userData);
-                document.getElementById("playerName").textContent = user.name || "Player Name";
-                document.getElementById("playerID").textContent = playerID;
-            } else {
-                console.log("No user data found in local storage");
             }
         }
 
