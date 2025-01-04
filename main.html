@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Masters - Landing Page - Version 1.018</title>
+  <title>Barcode Masters - Landing Page - Version 1.01165</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -111,12 +111,9 @@
 
     <!-- Player Info on the right -->
     <div class="player-info">
-      <div class="player-avatar"></div> <!-- Placeholder for Player Avatar -->
+      <img id="playerAvatar" class="player-avatar" src="default-avatar.png" alt="Player Avatar"> <!-- Placeholder for Player Avatar -->
       <p><strong>Player Name:</strong> <span id="playerName">Player One</span></p>
-      <p><strong>Player ID:</strong> <span id="playerID">1234567890</span></p>
-      <p><strong>Wins:</strong> <span id="playerWins">0</span></p>
-      <p><strong>Losses:</strong> <span id="playerLosses">0</span></p>
-      <p><strong>Monsters Collected:</strong> <span id="playerMonsters">0</span></p>
+      <p><strong>Player Email:</strong> <span id="playerEmail">player@example.com</span></p>
     </div>
   </div>
 
@@ -134,19 +131,36 @@
     <button class="button" onclick="window.location.href='help.html'">Help</button>
   </div>
 
-  <div id="version">Prototype Version 1.018</div>
+  <div id="version">Prototype Version 1.01165</div>
   <div style="font-size: 12px; color: gray; margin-top: 20px;">&copy; 2025 Barcode Masters. All rights reserved.</div>
 
   <script>
     // Checking if the script runs correctly
     console.log("Page Loaded");
 
-    // Dynamically set the player name and ID from game logic or local storage
-    document.getElementById('playerName').textContent = "Gumby";  // Example name
-    document.getElementById('playerID').textContent = "1001";  // Example ID
-    document.getElementById('playerWins').textContent = "5";  // Example wins
-    document.getElementById('playerLosses').textContent = "2";  // Example losses
-    document.getElementById('playerMonsters').textContent = "10";  // Example monsters collected
+    // Function to extract user data from ID token
+    function parseJwt (token) {
+      var base64Url = token.split('.')[1];
+      var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+
+      return JSON.parse(jsonPayload);
+    }
+
+    // Get user data from local storage
+    const userData = localStorage.getItem('userData');
+    if (userData) {
+      const user = parseJwt(userData);
+
+      // Set player info
+      document.getElementById('playerName').textContent = user.name || "Player Name";
+      document.getElementById('playerEmail').textContent = user.email || "Player Email";
+      document.getElementById('playerAvatar').src = user.picture || "default-avatar.png";
+    } else {
+      console.log("No user data found in local storage");
+    }
   </script>
 </body>
 </html>
