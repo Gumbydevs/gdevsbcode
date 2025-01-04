@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Masters - Login Page - Version 1.0183</title>
+  <title>Barcode Masters - Login Page - Version 1.01821</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -53,8 +53,8 @@
   <!-- Google Identity Services Script -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-  <!-- Content Security Policy with Nonce for Inline Scripts -->
-  <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://apis.google.com https://www.gstatic.com; script-src-elem 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline';">
+  <!-- Content Security Policy for External Scripts -->
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://accounts.google.com 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
 </head>
 <body>
   <div class="main-header">
@@ -70,7 +70,7 @@
   <!-- Google Sign-In button container -->
   <div id="googleSignInBtn"></div>
 
-  <div id="version">Prototype Version 1.0183</div>
+  <div id="version">Prototype Version 1.01821</div>
   <div style="font-size: 12px; color: gray; margin-top: 20px;">&copy; 2025 Barcode Masters. All rights reserved.</div>
 
   <!-- Inline Script -->
