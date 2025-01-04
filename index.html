@@ -54,7 +54,7 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <!-- Content Security Policy with Nonce for Inline Scripts -->
-  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.gstatic.com; script-src-elem 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline';">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://apis.google.com https://www.gstatic.com; script-src-elem 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline';">
 </head>
 <body>
   <div class="main-header">
@@ -67,14 +67,14 @@
   <h2>Login to Barcode Masters</h2>
   <p>Sign in with your Google account to begin your adventure!</p>
 
-  <!-- Google Sign-In button -->
+  <!-- Google Sign-In button container -->
   <div id="googleSignInBtn"></div>
 
   <div id="version">Prototype Version 1.0183</div>
   <div style="font-size: 12px; color: gray; margin-top: 20px;">&copy; 2025 Barcode Masters. All rights reserved.</div>
 
-  <!-- Inline Script with Nonce -->
-  <script nonce="YOUR_UNIQUE_NONCE">
+  <!-- Inline Script -->
+  <script>
     // Initialize the Google Identity Services client
     function handleClientLoad() {
       window.google.accounts.id.initialize({
