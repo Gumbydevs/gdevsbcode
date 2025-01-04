@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Masters - Login Page - Version 1.0181</title>
+  <title>Barcode Masters - Login Page - Version 1.0182</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -50,7 +50,7 @@
     }
   </style>
   <!-- Google OAuth Script -->
-  <script src="https://apis.google.com/js/api.js" async defer></script>
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
 </head>
 <body>
   <div class="main-header">
@@ -66,10 +66,11 @@
   <!-- Google Sign-In button -->
   <button class="button" id="googleSignInBtn">Sign in with Google</button>
   
-  <div id="version">Prototype Version 1.0181</div>
+  <div id="version">Prototype Version 1.0182</div>
   <div style="font-size: 12px; color: gray; margin-top: 20px;">&copy; 2025 Barcode Masters. All rights reserved.</div>
 
   <script>
+    // Function to handle Google API client initialization
     function handleClientLoad() {
       gapi.load('auth2', function() {
         gapi.auth2.init({
@@ -88,6 +89,8 @@
               localStorage.setItem('userEmail', userEmail);
               // Redirect to home page
               window.location.href = 'home.html';
+            }).catch(function(error) {
+              console.error("Sign-in failed:", error);
             });
           });
         }).catch(function(error) {
@@ -96,17 +99,14 @@
       });
     }
 
-    // Load Google API Client and wait for it to be ready
-    function loadGoogleAPI() {
-      if (window.gapi) {
+    // Wait for gapi to be loaded and initialize the client
+    window.onload = function() {
+      if (typeof gapi !== 'undefined') {
         handleClientLoad();
       } else {
-        setTimeout(loadGoogleAPI, 500); // Retry every 500ms until gapi is available
+        console.error('Google API not loaded properly.');
       }
-    }
-
-    // Wait for gapi to load properly
-    loadGoogleAPI();
+    };
   </script>
 </body>
 </html>
