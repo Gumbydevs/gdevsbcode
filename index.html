@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode Masters - Login Page - Version 1.0183</title>
+  <title>Barcode Masters - Login Page - Version 1.0182</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -50,11 +50,11 @@
     }
   </style>
 
-  <!-- Google OAuth Script -->
-  <script src="https://apis.google.com/js/platform.js" async defer></script>
-  
+  <!-- Google Identity Services Script -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <!-- Content Security Policy -->
-  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline';">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.gstatic.com; script-src-elem 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline';">
 
 </head>
 <body>
@@ -67,51 +67,39 @@
 
   <h2>Login to Barcode Masters</h2>
   <p>Sign in with your Google account to begin your adventure!</p>
-  
+
   <!-- Google Sign-In button -->
-  <button class="button" id="googleSignInBtn">Sign in with Google</button>
+  <div id="googleSignInBtn"></div>
   
-  <div id="version">Prototype Version 1.0183</div>
+  <div id="version">Prototype Version 1.0182</div>
   <div style="font-size: 12px; color: gray; margin-top: 20px;">&copy; 2025 Barcode Masters. All rights reserved.</div>
 
   <script>
-    // Function to handle Google API client initialization
+    // Initialize the Google Identity Services client
     function handleClientLoad() {
-      gapi.load('auth2', function() {
-        gapi.auth2.init({
-          client_id: '472252081207-mpmsv3vd6p2ej50cokl2a0jhiepla90t.apps.googleusercontent.com', // Your client ID here
-          scope: 'profile email' // Ensures we have the necessary scopes
-        }).then(function() {
-          // Setup Google sign-in button
-          document.getElementById('googleSignInBtn').addEventListener('click', function() {
-            gapi.auth2.getAuthInstance().signIn().then(function(googleUser) {
-              const profile = googleUser.getBasicProfile();
-              const userId = profile.getId();
-              const userName = profile.getName();
-              const userEmail = profile.getEmail();
-              // Store user data locally (or on a server)
-              localStorage.setItem('userId', userId);
-              localStorage.setItem('userName', userName);
-              localStorage.setItem('userEmail', userEmail);
-              // Redirect to home page
-              window.location.href = 'home.html';
-            }).catch(function(error) {
-              console.error("Sign-in failed:", error);
-            });
-          });
-        }).catch(function(error) {
-          console.error("Error initializing Google API:", error);
-        });
+      window.google.accounts.id.initialize({
+        client_id: '472252081207-mpmsv3vd6p2ej50cokl2a0jhiepla90t.apps.googleusercontent.com',
+        callback: handleCredentialResponse
       });
+
+      window.google.accounts.id.renderButton(
+        document.getElementById("googleSignInBtn"),
+        { theme: "outline", size: "large" }
+      );
     }
 
-    // Wait for gapi to be loaded and initialize the client
+    // Handle the credential response from Google
+    function handleCredentialResponse(response) {
+      const user = response.credential;
+      console.log("ID Token: " + user); // You can parse the token to extract user data
+      // Redirect to home page with user info
+      localStorage.setItem('userData', user);
+      window.location.href = 'home.html';
+    }
+
+    // Call the function to initialize when the script is loaded
     window.onload = function() {
-      if (typeof gapi !== 'undefined') {
-        handleClientLoad();
-      } else {
-        console.error('Google API not loaded properly.');
-      }
+      handleClientLoad();
     };
   </script>
 </body>
