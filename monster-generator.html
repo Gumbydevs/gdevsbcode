@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barcode DNA Extractor - Version 0.032</title>
+  <title>Barcode DNA Extractor - Version 0.033</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -129,7 +129,7 @@
     <button onclick="window.location.href='index.html'">Main Page</button>
   </div>
   <div id="consoleOutput"></div>
-  <div id="version">Version 0.032</div>
+  <div id="version">Version 0.033</div>
   <div style="font-size: 12px; color: gray; margin-top: 20px;">&copy; 2025 Barcode Masters. All rights reserved.</div>
 
   <script type="module">
@@ -207,7 +207,7 @@
       try {
         qrScanner = new QrScanner(
           video,
-          (result) => {
+          async (result) => {
             if (!barcodeScanned) {
               barcodeScanned = true;
               const monster = generateMonster(result.data);
@@ -218,6 +218,7 @@
               forceScanButton.style.display = "none";
               logToConsole(`Scan Result: ${result.data}`);
               displayMonsterInfo(monster);
+              await saveToGoogleSheet(monster);
             }
           },
           {
@@ -233,20 +234,4 @@
         logToConsole("QR Scanner started...");
       } catch (error) {
         logToConsole(`Error: ${error.message}`);
-      }
-    });
-
-    forceScanButton.addEventListener("click", async () => {
-      if (qrScanner) {
-        const result = await qrScanner.scanImage();
-        message.textContent = `Force Scan Result: ${result?.data || "No barcode detected"}`;
-        logToConsole(`Force Scan Result: ${result?.data || "No barcode detected"}`);
-      }
-    });
-
-    window.addEventListener("beforeunload", () => {
-      if (qrScanner) qrScanner.destroy();
-    });
-  </script>
-</body>
-</html>
+[_{{{CITATION{{{_1{](https://github.com/pasipiya/barcode-reader/tree/983075fc014d2c0d88f447ff8d462bd87db9bcd6/index.php)
